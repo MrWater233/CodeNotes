@@ -32,7 +32,7 @@
 
 ## Collection接口
 
-![image-20191122162449096](C:\Users\JM Wan\Desktop\image-20191122162449096.png)
+![image](https://github.com/MrWater233/CodeNotes/blob/master/Picture/Collection.png?raw=true)
 
 - Set：元素有顺序，并且元素不可以重复
 - List：元素有顺序，元素可以重复
@@ -229,7 +229,7 @@ HashSet中的方法与Collection中的方法相同，并且继承了Object中的
 
 ### Queue接口
 
-![image-20191123125825921](C:\Users\JM Wan\Desktop\image-20191123125825921.png)
+![image](https://github.com/MrWater233/CodeNotes/blob/master/Picture/Queue.png?raw=true)
 
 > 队列继承Collection接口，除了继承Collection接口中的方法以外，还提供了队列操作
 
@@ -266,7 +266,7 @@ HashSet中的方法与Collection中的方法相同，并且继承了Object中的
 
 ## Map接口 
 
-![image-20191122162535373](C:\Users\JM Wan\Desktop\image-20191122162535373.png)
+![image](https://github.com/MrWater233/CodeNotes/blob/master/Picture/Map.png?raw=true)
 
 - Map：由键值对(Key-Vaule)组成，键不能重复，值可以重复
 
