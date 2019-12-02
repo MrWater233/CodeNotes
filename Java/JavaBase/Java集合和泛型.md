@@ -32,7 +32,7 @@
 
 ## Collection接口
 
-![image](https://github.com/MrWater233/CodeNotes/blob/master/Pictures/Java/JavaBase/Java%E9%9B%86%E5%90%88%E5%92%8C%E6%B3%9B%E5%9E%8B/Collection.png?raw=true)
+![Demo](images/Collection.png)
 
 - Set：元素有顺序，并且元素不可以重复
 - List：元素有顺序，元素可以重复
@@ -229,7 +229,7 @@ HashSet中的方法与Collection中的方法相同，并且继承了Object中的
 
 ### Queue接口
 
-![image](https://github.com/MrWater233/CodeNotes/blob/master/Pictures/Java/JavaBase/Java%E9%9B%86%E5%90%88%E5%92%8C%E6%B3%9B%E5%9E%8B/Queue.png?raw=true)
+![Demo](images/Queue.png)
 
 > 队列继承Collection接口，除了继承Collection接口中的方法以外，还提供了队列操作
 
@@ -266,7 +266,7 @@ HashSet中的方法与Collection中的方法相同，并且继承了Object中的
 
 ## Map接口 
 
-![image](https://github.com/MrWater233/CodeNotes/blob/master/Pictures/Java/JavaBase/Java%E9%9B%86%E5%90%88%E5%92%8C%E6%B3%9B%E5%9E%8B/Map.png?raw=true)
+![Demo](images/Map.png)
 
 - Map：由键值对(Key-Vaule)组成，键不能重复，值可以重复
 
