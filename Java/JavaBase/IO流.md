@@ -123,7 +123,16 @@ public interface FilenameFilter{
 
 #### ByteArrayInputStream
 
+> 从缓冲即字节数组中读取数据 
 
+- 继承并实现了`InputStream`类中的方法，支持`reset()`、`mark()`、`skip()`等方法，但是`close()`**无效**。
+
+##### 构造函数
+
+| 方法                                                     | 作用                                                         |
+| -------------------------------------------------------- | ------------------------------------------------------------ |
+| `ByteArrayInputStream(byte []buf)`                       | 常见一个字节数组输入流对象，使用buf作为缓冲区数组            |
+| `ByteArrayInputStream(byte []bufmint offset,int length)` | 创建一个字节数组输入流对象，从offset位置开始读取了length个字节数据 |
 
 ### OutputStream
 
@@ -161,6 +170,35 @@ public interface FilenameFilter{
 继承了父类中的所有方法，`flush()`将缓冲中所有字节内容输出。
 
 #### ByteArrayOutputStream
+
+> 提供了缓冲区来暂存输出的字节数据
+
+- 缓冲区会随着字节数据的不断增长不断写入而自动增长，输出完成以后可以从中提取数据。因此常用于存储数据以用于一次输出
+
+- 用户可以通过`toByteArray()`和`toString`获取缓冲区中的数据
+- `close()`无效
+
+##### 构造函数
+
+| 方法                              | 作用                                             |
+| --------------------------------- | ------------------------------------------------ |
+| `ByteArrayOutputStream()`         | 创建一个字节数组输出流对象                       |
+| `ByteArrayOutputStream(int size)` | 创建一个指定缓冲区大小为size的字节数组输出流对象 |
+
+##### 常用方法
+
+继承了父类的方法，同时新增部分方法和重载`write()`。
+
+| 方法                                   | 作用                                            |
+| -------------------------------------- | ----------------------------------------------- |
+| `int size()`                           | 返回缓冲区当前大小                              |
+| `void reset)()`                        | 将缓冲区重置为0                                 |
+| `byte[] toByteArray()`                 | 创建一个新分配的byte数组                        |
+| `String toString()`                    | 将缓冲区的字节数据转换成字符串                  |
+| `String toString(String charsetName)`  | 将缓冲区的字节数据转换成指定字符集编码的字符串  |
+| `void write(byte[] b,int off,int len)` | 将字节数组b从off位置开始的len个数据输出到缓冲区 |
+| `void write(int b)`                    | 将字节数据b输出到缓冲区                         |
+| `void writeTo(OutputStream out)`       | 将缓冲区中的字节数据输出到out中                 |
 
 
 
