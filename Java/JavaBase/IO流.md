@@ -134,6 +134,16 @@ public interface FilenameFilter{
 | `ByteArrayInputStream(byte []buf)`                       | 常见一个字节数组输入流对象，使用buf作为缓冲区数组            |
 | `ByteArrayInputStream(byte []bufmint offset,int length)` | 创建一个字节数组输入流对象，从offset位置开始读取了length个字节数据 |
 
+#### DataInputStream
+
+> 数据输入流，可以对基本数据类型进行输入
+
+##### 构造函数
+
+`DataInputStream(InputStream in)`
+
+以输入流对象`in`来创建输入流对象
+
 ### OutputStream
 
 #### 常用方法
@@ -192,13 +202,15 @@ public interface FilenameFilter{
 | 方法                                   | 作用                                            |
 | -------------------------------------- | ----------------------------------------------- |
 | `int size()`                           | 返回缓冲区当前大小                              |
-| `void reset)()`                        | 将缓冲区重置为0                                 |
+| `void reset()`                         | 将缓冲区重置为0                                 |
 | `byte[] toByteArray()`                 | 创建一个新分配的byte数组                        |
 | `String toString()`                    | 将缓冲区的字节数据转换成字符串                  |
 | `String toString(String charsetName)`  | 将缓冲区的字节数据转换成指定字符集编码的字符串  |
 | `void write(byte[] b,int off,int len)` | 将字节数组b从off位置开始的len个数据输出到缓冲区 |
 | `void write(int b)`                    | 将字节数据b输出到缓冲区                         |
 | `void writeTo(OutputStream out)`       | 将缓冲区中的字节数据输出到out中                 |
+
+#### DataOutputStream
 
 
 
