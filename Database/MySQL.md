@@ -86,3 +86,9 @@ select 字段一,字段二 from 表名;
 update 表名 set 字段名=字段值 where 条件;
 ```
 
+清空数据库
+
+```sql
+truncate TABLE 表名;
+```
+
