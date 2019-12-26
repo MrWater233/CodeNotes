@@ -160,7 +160,7 @@ public interface FilenameFilter{
 
 > `DataInputStream`类继承了`InputStream`类中的方法用于读取字节数据，同时增加了读取基本数据的方法
 
-![image]()
+![image](https://github.com/MrWater233/CodeNotes/blob/master/Java/JavaBase/images/DataInputStream%E5%B8%B8%E7%94%A8%E6%96%B9%E6%B3%95.png?raw=true)
 
 
 
@@ -250,7 +250,7 @@ public interface FilenameFilter{
 
 ##### 常用方法
 
-![image]()
+![image](https://github.com/MrWater233/CodeNotes/blob/master/Java/JavaBase/images/DataOutpueStream%E5%B8%B8%E7%94%A8%E6%96%B9%E6%B3%95.png?raw=true)
 
 
 
@@ -262,13 +262,13 @@ public interface FilenameFilter{
 
 ##### 构造方法
 
-![image]()
+![image](https://github.com/MrWater233/CodeNotes/blob/master/Java/JavaBase/images/PrintStream%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95.jpg?raw=true)
 
 如果参数为`System.out`那么向标准输出设备输出字节数据
 
 ##### 常用方法
 
-![image]()
+![image](https://github.com/MrWater233/CodeNotes/blob/master/Java/JavaBase/images/PringStream%E5%B8%B8%E7%94%A8%E6%96%B9%E6%B3%95.jpg?raw=true)
 
 增加了`print()`、`println()`、`printf()`方法将数据**原样**输出到输出目标中
 
@@ -292,7 +292,7 @@ public interface FilenameFilter{
 
 ##### 构造方法
 
-![image]()
+![image](https://github.com/MrWater233/CodeNotes/blob/master/Java/JavaBase/images/InputStreamReader%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95.png?raw=true)
 
 ##### 注意
 
@@ -368,7 +368,7 @@ public interface FilenameFilter{
 
 ##### 构造方法
 
-![image]()
+![image](https://github.com/MrWater233/CodeNotes/blob/master/Java/JavaBase/images/OutputStreamWriter%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95.png?raw=true)
 
 创建向标准输出设备的输出
 
@@ -386,7 +386,7 @@ public interface FilenameFilter{
 
 ##### 构造方法
 
-![image]()
+![image](https://github.com/MrWater233/CodeNotes/blob/master/Java/JavaBase/images/FileWriter%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95.png?raw=true)
 
 
 
@@ -436,7 +436,7 @@ public interface FilenameFilter{
 
 ##### 构造方法
 
-![image]()
+![image](https://github.com/MrWater233/CodeNotes/blob/master/Java/JavaBase/images/PrinterWriter%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95.png?raw=true)
 
 ##### 常用方法
 
