@@ -116,6 +116,7 @@ public class Server {
             out.close();
             socket.close();
         }
+        server.close();
     }
 }
 ```
@@ -142,6 +143,7 @@ public class Server {
             Thread th = new Thread(new MyDownload(socket));
             th.start();
         }
+        server.close();
     }
 }
 ```
