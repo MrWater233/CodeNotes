@@ -6,7 +6,7 @@
    git remote -v
    ```
    
-2. 从远程master分支获取最新版本到本地
+2. 从远程master分支获取最新版本到本地temp分支
    
    ```
    git fetch origin master:temp
@@ -24,7 +24,13 @@
    git merge temp
    ```
 
-   <font color=red>如果merge过程出现冲突无法合并，就进入冲突文件修改文件，再重新commit即可</font>
+   <font color=red>如果merge过程出现冲突无法合并，就进入冲突文件修改文件，再重新`commit`即可</font>
+
+   如果无法解决冲突需要撤销合并，执行以下命令即可
+
+   ```
+   git reset --merge
+   ```
 
 5. 删除temp分支
 
