@@ -1,364 +1,645 @@
-# 1 权限管理基础知识
+# 一.Shiro的三大组件
 
-## 1.1 用户认证
+- Subject：直接用用户使用，使用简单，底层操作SecurityManager
+- SecurityManager：核心，执行Shiro的各种操作（除了加密）
+- Realm：类似Dao层，由核心调用，提供用户的认证和授权信息
 
-即用户的身份验证
+# 二.权限规则
 
-### 关键对象
+| 符号 | 说明                                      |
+| ---- | ----------------------------------------- |
+| `:`  | 分隔符，用于分隔资源和操作【`资源:操作`】 |
+| `,`  | 用于分隔多个权限【`权限1,权限2,权限3`】   |
+| `*`  | 通配符，代表所有操作、资源【`资源:*`】    |
 
-- Subject---主题，理解为用户，系统需要对subject进行认证
-- principal：身份信息，通常是唯一的，一个主体由多个身份信息，但是都有一个主身份信息（primary principal）
-- credential：凭证信息，可以实密码、证书、指纹
+## 细节
 
-总结：主体在身份认真需要身份和凭证信息
+- `user:*`可以匹配`user:xx:xxx`
 
-## 1.2 用户授权
+  `*:query`不能匹配 `xxx:xx:query`
 
-简单理解为访问控制，在用户通过认证后系统对用户访问资源进行控制。
+- `user:update,user:insert`可以简写为 `"user:update,insert"`（<font color=red>注意引号</font>）
 
-### 关键对象
+## 实例级别的权限
 
-过程：who对what做how操作
+> `资源:操作:实例`
 
-- who：主体，即Subject，Subject在认证通过后系统进行访问控制
-- which：资源（resource），subject必须具备某些资源的权限才能访问。资源比如：系统用户的列表页面
-  - 资源类型：系统用户信息
-  - 资源实例：id为001的用户
-- how：权限/许可（permission），针对资源的权限或许可，Subject具有permission访问资源，如何访问，操作需要定义permission权限比如哟关乎添加、修改、删除
-- SecurityManager---管理所有用户
-- Realm---连接数据
+如`user:delete:1`：删除用户1
 
-### 权限模型
+# 三.过滤规则
 
-- 用户
+过滤规则=路径规则+权限规则
 
-- 权限
-- 角色（对资源的打包）
-- 角色和权限的关系
-- 用户和角色的关系
+<font color=blue>URL匹配是从上到下寻找过滤规则，找到就停止，所以应当遵循范围由小到大从上到下配置</font>
 
-![images](https://github.com/MrWater233/CodeNotes/blob/master/Java/images/%E6%9D%83%E9%99%90%E6%A8%A1%E5%9E%8B.png?raw=true)
+## 路径规则
 
-### 权限控制(控制核心)
+- `/user/*`：代表`/user`后面还有一级任意路径
+- `/user/**`： 代表`/user`后面还有任意多级任意路径
+- `/user/hello?`：代表hello后面还有任意一个字符，如`/user/helloa`
 
-#### 基于角色的访问控制
+## 权限规则
 
-RBAC(role based access control)
+| 名称         | 作用                                                   |
+| ------------ | ------------------------------------------------------ |
+| anon（匿名） | 无需认证就能访问                                       |
+| authc        | 必须认证（登陆）才能访问                               |
+| user         | 必须拥有"记住我"功能才能用                             |
+| perms        | 拥有对某个资源的权限才能访问，如`perms["user:update"]` |
+| roles        | 拥有某个角色权限才能访问，如`roles["admin"]`           |
+| logout       | 登出，不用定义handler                                  |
 
-基于角色的访问控制不利于系统维护（可扩展性不强）
+# 四.Shiro标签
 
-#### 基于资源的访问控制
+> 通过Shiro完成对前端页面元素的访问控制
 
-RBAC（resource based access control）
+## 配置
 
-# 2 权限管理的解决方案
+1. 依赖
 
-## 2.1 粗粒度和细粒度
-
-- 粗粒度管理：对资源类型的管理
-
-  资源类型比如：菜单，URL连接，用户添加页面、用户信息、类方法、页面中的按钮...
-
-- 细粒度管理：对资源实例的管理
-
-  资源实例就是对资源类型的具体化，比如：用户id为001的修改链接、1110班的用户信息...，就是数据级别的权限管理。
-
-## 2.2 如何实现粗粒度和细粒度的权限管理
-
-### 粗粒度
-
-通过SpringMvc的拦截器实现授权
-
-### 细粒度
-
-在数据级别没有共性，就是业务逻辑的一部分。
-
-# 3 基于URL的权限管理
-
-## 3.1 数据库
-
-角色表、用户表、权限表（权限+资源）、用户角色表、角色权限表
-
-# 快速开始
-
-1. 导入依赖
-
-2. 配置文件
-
-3. Hello world
-
-   ```java
-   //获得当前用户对象
-   Subject currentUser = SecurityUtils.getSubject();
-   //通过当前用户拿到session
-   Session session = currentUser.getSession();
-   //判断当前用户是否被认证
-   currentUser.isAuthenticated();
-   //用户登陆
-   currentUser.login(token);
-   //获得当前用户的认证
-   currentUser.getPrincipal();
-   //判断用户是否拥有"schwartz"这个角色
-   currentUser.hasRole("schwartz");
-   //判断用户是否有"lightsaber:wield"这个权限
-   currentUser.isPermitted("lightsaber:wield");
-   //用户注销
-   currentUser.logout();
+   ```xml
+   <dependency>
+       <groupId>com.github.theborakompanioni</groupId>
+       <artifactId>thymeleaf-extras-shiro</artifactId>
+       <version>2.0.0</version>
+   </dependency>
    ```
 
-# 环境配置
+2. 配置Bean
 
-## 导入依赖
+   ```java
+   @Configuration
+   public class ShrioConfig {
+       @Bean
+       public ShiroDialect shiroDialect() {
+           return new ShiroDialect();
+       }
+   }
+   ```
 
-```xml
-<dependency>
-  <groupId>org.apache.shiro</groupId>
-  <artifactId>shiro-spring-boot-starter</artifactId>
-  <version>1.4.2</version>
-</dependency>
-```
+3. 导入Shiro标签
 
-# Shiro使用
+   ```html
+   <!DOCTYPE html>
+   <html xmlns:th="http://www.thymeleaf.org" 
+         xmlns:shiro="http://www.pollix.at/thymeleaf/shiro" >
+   ```
 
-## 框架
+## 使用
 
-### 创建Realm
+### 身份认证
 
-UserRealm.java：
+| 标签                       | 作用                       |
+| -------------------------- | -------------------------- |
+| `<shrio:authenticated>`    | 已登录                     |
+| `<shiro:user>`             | 已登录 或 记住我           |
+| `<shiro:guest>`            | 游客（未登录 且 未记住我） |
+| `<shiro:notAuthenticated>` | 未登录                     |
+| `<shiro:principal/>`       | 获取用户身份信息           |
+
+### 角色校验
+
+| 标签                                       | 作用               |
+| ------------------------------------------ | ------------------ |
+| `<shiro:hasAnyRoles name="admin,manager">` | 是其中任何一个角色 |
+| `<shiro:hasRole name="admin">`             | 是指定角色         |
+| `<shiro:lacksRole name="admin">`           | 不是指定角色       |
+
+### 权限校验
+
+| 标签                                         | 作用         |
+| -------------------------------------------- | ------------ |
+| `<shiro:hasPermission name="user:delete">`   | 有指定权限   |
+| `<shiro:lacksPermission name="user:delete">` | 没有指定权限 |
+
+# 五.自定义Realm
+
+## 表的创建
+
+一共需要五张表来建立**用户---角色---权限**的关系
+
+![images](https://raw.githubusercontent.com/MrWater233/PictureHost/master/%E7%94%A8%E6%88%B7%E8%A7%92%E8%89%B2%E6%9D%83%E9%99%90%E8%A1%A8.png)
+
+## 授权和认证框架
+
+> 自定义Realm需要继承父类
+>
+> 有两个父类可以选择：
+>
+> 1. 如果只做身份验证：AuthenticatingRealm
+> 2. 身份验证+权限校验：AuthorizingRealm
 
 ```java
-//自定义的realm
-public class UserRealm extends AuthorizingRealm {
-    //授权
+public class RealmConfig extends AuthorizingRealm {
+    /**
+     * 作用：查询权限信息
+     * 触发时刻：1.过滤URL时  2.使用shiro标签时
+     * 查询方式：通过用户名查询用户权限角色信息
+     * @param principalCollection
+     * @return
+     */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
-        System.out.println("执行了->授权doGetAuthorizationInfo");
+        //获取用户名
+        String username = (String)principalCollection.getPrimaryPrincipal();
+        //查询角色和权限信息 RoleService PermissionService
         return null;
     }
-    //认证
+
+    /**
+     * 作用：查询身份信息，将身份信息返回即可
+     * 查询方式：通过用户名（token）查询用户信息
+     *         （UsernamePasswordToken是AuthenticationToken子类）
+     * 触发时刻：调用subject.login(token)时，底层由securitymanage调用
+     * @param authenticationToken
+     * @return
+     * @throws AuthenticationException
+     */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        System.out.println("执行了->认证doGetAuthorizationInfo");
+        //获取用户登陆时的用户名
+        String username = (String)authenticationToken.getPrincipal();
+        //查询用户信息 UserService
         return null;
     }
 }
 ```
 
-### 配置ShrioConfig
+## Dao层的处理
 
-ShrioConfig.java：
+因为用户---角色---权限表相互关联，所以需要用到[内连接](com.mysql.cj.jdbc.Driver)的多表查询
+
+如下为最复杂的一个权限查询sql
+
+<font color=green>PS：注意内连接可能产生重复（因为角色之间的权限可能重复），需要`DISTINCT`去重</font>
+
+```sql
+SELECT DISTINCT t_permission.permission_name FROM t_user
+JOIN t_user_role ON t_user.id = t_user_role.user_id
+JOIN t_role ON t_role.id = t_user_role.role_id
+JOIN t_role_permission ON t_role_permission.role_id = t_role.id
+JOIN t_permission ON t_role_permission.permission_id = t_permission.id
+WHERE t_user.username = #{username}
+```
+
+## Realm的完整配置
+
+```java
+public class RealmConfig extends AuthorizingRealm {
+    @Autowired
+    UserService userService;
+    @Autowired
+    RoleService roleService;
+    @Autowired
+    PermissionService permissionService;
+    /**
+     * 作用：查询权限信息
+     * 触发时刻：1.过滤URL时  2.使用shiro标签时
+     * 查询方式：通过用户名查询用户权限角色信息
+     * @param principalCollection
+     * @return
+     */
+    @Override
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+        //获取用户名
+        String username = (String)principalCollection.getPrimaryPrincipal();
+        //查询角色信息，并转为set
+        List<String> roles_list = roleService.queryAllRolenameByUsername(username);
+        Set<String> roles = new HashSet<>(roles_list);
+        //查询权限信息，并转为set
+        List<String> perms_list = permissionService.queryAllPermissionByUsername(username);
+        Set<String> perms = new HashSet<>(perms_list);
+        //封装对象
+        SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo(roles);
+        simpleAuthorizationInfo.setStringPermissions(perms);
+        return simpleAuthorizationInfo;
+    }
+
+    /**
+     * 作用：查询身份信息，将身份信息返回即可
+     * 查询方式：通过用户名（token）查询用户信息
+     *         （UsernamePasswordToken是AuthenticationToken子类）
+     * 触发时刻：调用subject.login(token)时，底层由securitymanage调用
+     * @param authenticationToken
+     * @return
+     * @throws AuthenticationException
+     */
+    @Override
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
+        //获取用户登陆时的用户名
+        String username = (String)authenticationToken.getPrincipal();
+        //查询用户信息
+        User user = userService.queryUserByUsername(username);
+        //判断用户信息是否为空
+        if(user==null){
+            //在后续流程中会抛出异常 UnknownAccountException
+            return null;
+        }
+        /**
+         * 将用户信息封装，后续会将token和返回值进行比对
+         * 参数：1.数据库中用户名 2.数据库中密码 3.当前Realm的标识（类名+_+内部封装的某一个值）
+         */
+        return new SimpleAuthenticationInfo(user.getUsername(), user.getPassword(), getName());
+    }
+}
+```
+
+# 六.ShrioConfig完整配置
 
 ```java
 @Configuration
-public class ShiroConfig {
-    //3.ShiroFilterFactoryBean
+public class ShrioConfig {
+    /**
+     * 配置Shrio的拦截器
+     * @param securityManager
+     * @return
+     */
     @Bean
-    public ShiroFilterFactoryBean getShiroFilterFactoryBean(@Qualifier("securityManager") DefaultWebSecurityManager defaultWebSecurityManager){
-        ShiroFilterFactoryBean bean = new ShiroFilterFactoryBean();
-        //设置安全管理器
-        bean.setSecurityManager(defaultWebSecurityManager);
-        return bean;
+    public ShiroFilterFactoryBean shiroFilter(@Qualifier("securityManager") DefaultWebSecurityManager securityManager){
+        ShiroFilterFactoryBean shiroFilterFactoryBean  = new ShiroFilterFactoryBean();
+        // 必须设置 SecurityManager
+        shiroFilterFactoryBean.setSecurityManager(securityManager);
+        //拦截器，配置拦截链，请求会逐条判断
+        Map<String,String> filterChainDefinitionMap = new LinkedHashMap<String,String>();
+        //配置退出过滤器,其中的具体的退出代码Shiro已经替我们实现了，只需要访问/logout即可退出登录
+        filterChainDefinitionMap.put("/logout", "logout");
+        //过滤链定义，从上向下顺序执行，一般将 /**放在最为下边;
+        filterChainDefinitionMap.put("/**", "anon");
+        //配置登录的URL
+        shiroFilterFactoryBean.setLoginUrl("/user/login");
+        //登录成功后要跳转的链接
+        shiroFilterFactoryBean.setSuccessUrl("/user/index");
+        //没有授权跳转的URL
+        shiroFilterFactoryBean.setUnauthorizedUrl("/user/login");
+        shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
+        return shiroFilterFactoryBean;
     }
 
-
-    //2.DefaultWebSecurityManager
-    @Bean(name = "securityManager")
-    public DefaultWebSecurityManager getDefaultWebSecurityManager(@Qualifier("userRealm") UserRealm userRealm){//将realm对象从ioc中获取，并指定获取的bean名
+    /**
+     * 注入Shiro的安全管理器
+     * @param realmConfig
+     * @return
+     */
+    @Bean
+    public DefaultWebSecurityManager securityManager(@Qualifier("realm") RealmConfig realmConfig){
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
-        //关联UserRealm
-        securityManager.setRealm(userRealm);
+        securityManager.setRealm(realmConfig);
         return securityManager;
     }
 
-
-    //1.创建 realm对象，需要自定义
+    /**
+     * 注入自定义的Realm
+     * @return
+     */
     @Bean
-    public UserRealm userRealm(){
-        return new UserRealm();
+    public RealmConfig realm(){
+        return new RealmConfig();
+    }
+
+    /**
+     * 注入Shiro标签需要的配置
+     * @return
+     */
+    @Bean
+    public ShiroDialect shiroDialect() {
+        return new ShiroDialect();
     }
 }
 ```
 
-## 设置拦截
+# 七.加密
 
-| 名称  | 作用                         |
-| ----- | ---------------------------- |
-| anon  | 无需认证就能访问             |
-| authc | 必须认证（登陆）才能访问     |
-| user  | 必须拥有"记住我"功能才能用   |
-| perms | 拥有对某个资源的权限才能访问 |
-| role  | 拥有某个角色权限才能访问     |
+> 为了安全考虑，一般数据库中存入用户**不可逆**的加密密码
+
+## 加密方式
+
+1. 基本加密：
+
+   直接用md5、sha加密
+
+2. 加盐加密：
+
+   密码+盐值进行md5、sha加密
+
+3. 加盐多次迭代：
+
+   反复进行加盐和md5、sha加密
+
+建议使用加盐迭代加密，迭代次数1000+
+
+## 加密代码
 
 ```java
+/**
+ * password:密码
+ * salt:盐值
+ * iter:迭代次数
+ * toString默认转换为16进制返回
+ * toBase64压缩后更短
+ */
+String pwd = new Md5Hash(password,salt,iter).toString;//md5加密
+String pwd = new Md5Hash(password,salt,iter).toBase64;//加密转base64
+
+String pwd = new Sha256Hash(password,salt,iter).toString;//sha256加密
+String pwd = new Sha256Hash(password,salt,iter).toBase64;//加密转base64
+
+String pwd = new Sha512Hash(password,salt,iter).toString;//sha512加密
+String pwd = new Sha512Hash(password,salt,iter).toBase64;//加密转base64
+```
+
+## SpringBoot应用
+
+在用户表中增加salt字段来存储随机生成的盐
+
+### 注册
+
+在Service层实现加盐的迭代加密处理
+
+```java
+public Integer insertUser(User user) {
+    //获取随机盐
+    String salt = UUID.randomUUID().toString();
+    //加密
+    //参数：1.密码 2.盐值 3.迭代次数
+    String pwd = new Sha256Hash(user.getPassword(), salt, 1000).toBase64();
+    //设置密文
+    user.setPassword(pwd);
+    //设置盐
+    user.setSalt(salt);
+    return userDao.insertUser(user);
+}
+```
+
+### 登录
+
+1. Realm的认证中增加盐值返回
+
+   ```java
+   /**
+    * 作用：查询身份信息，将身份信息返回即可
+    * 查询方式：通过用户名（token）查询用户信息
+    * （UsernamePasswordToken是AuthenticationToken子类）
+    * 触发时刻：调用subject.login(token)时，底层由securitymanage调用
+    * @param authenticationToken
+    * @return
+    * @throws AuthenticationException
+    */
+   @Override
+   protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
+       System.out.println("认证");
+       //获取用户登陆时的用户名
+       String username = (String) authenticationToken.getPrincipal();
+       //查询用户信息
+       User user = userService.queryUserByUsername(username);
+       //判断用户信息是否为空
+       if (user == null) {
+           //在后续流程中会抛出异常 UnknownAccountException
+           return null;
+       }
+       /**
+        * 将用户信息封装，后续会将token和返回值进行比对
+        * 参数：1.数据库中用户名 2.数据库中密码  3.盐值(转换为ByteSource类型) 4.当前Realm的标识（类名+_+内部封装的某一个值）
+        */
+       return new SimpleAuthenticationInfo(user.getUsername(), user.getPassword(), ByteSource.Util.bytes(user.getSalt()), getName());
+   }
+   ```
+
+2. ShiroConfig中设置密码校验规则并交给Realm
+
+   ```java
+   /**
+    * 注入自定义的Realm
+    * @return
+    */
+   @Bean
+   public RealmConfig realm(@Qualifier("hashedCredentialsMatcher") HashedCredentialsMatcher matcher){
+       RealmConfig myRealm = new RealmConfig();
+       //设置密码校验方式，这里选择我们设置的哈希加密
+       myRealm.setCredentialsMatcher(matcher);
+       return myRealm;
+   }
+   
+   /**
+    * 密码校验规则HashedCredentialsMatcher
+    * 防止密码在数据库里明码保存 , 当然在登陆认证的时候 ,
+    * 这个类也负责对form里输入的密码进行编码
+    * 处理认证匹配处理器：如果自定义需要实现继承HashedCredentialsMatcher
+    * 需要将这个类注册给Realm，间接关联给SecurityManager
+    */
+   @Bean("hashedCredentialsMatcher")
+   public HashedCredentialsMatcher hashedCredentialsMatcher() {
+       //声明使用哈希密码校验器
+       HashedCredentialsMatcher credentialsMatcher = new HashedCredentialsMatcher();
+       //指定加密方式为SHA-256
+       credentialsMatcher.setHashAlgorithmName("sha-256");
+       //指定迭代次数
+       credentialsMatcher.setHashIterations(1000);
+       //true=16进制格式(toString) false=base64格式
+       credentialsMatcher.setStoredCredentialsHexEncoded(false);
+       return credentialsMatcher;
+   }
+   ```
+
+#  八.记住我
+
+> 登陆后将用户信息保存在Cookie中，下次访问不用登陆就可以识别身份
+
+## 开启
+
+> 在登陆之前开启即可，默认记住一年
+
+```java
+//获取subject，调用login
+Subject subject = SecurityUtils.getSubject();
+//创建登陆令牌
+UsernamePasswordToken token = new UsernamePasswordToken(user.getUsername(),user.getPassword());
+//开启记住我
+token.setRememberMe(true);
+//登陆，失败会抛出异常，交给异常解析器处理
+subject.login(token);
+```
+
+## 自定义配置
+
+[记住我的配置](https://juejin.im/post/5d3aa1a151882545be4b096a)
+
+ShrioConfig配置如下（SimpleCookie、CookieRememberMeManager可以提取到其他类中注入，简化ShrioConfig的配置 ）：
+
+```java
+/**
+ * 设置记住我Cookie的基本属性
+ * @return
+ */
 @Bean
-public ShiroFilterFactoryBean getShiroFilterFactoryBean(@Qualifier("securityManager") DefaultWebSecurityManager defaultWebSecurityManager){
-    ShiroFilterFactoryBean bean = new ShiroFilterFactoryBean();
-    //设置安全管理器
-    bean.setSecurityManager(defaultWebSecurityManager);
-    //登陆拦截
-    Map<String, String> filterMap = new LinkedHashMap<>();
-    //设置需要拦截的位置
-    filterMap.put("/user/add","authc");
-    filterMap.put("/user/update","authc");
-    //如果验证不通过，设置登陆页面
-    bean.setLoginUrl("/toLogin");
-    //添加需要拦截的页面
-    bean.setFilterChainDefinitionMap(filterMap);
-    return bean;
+public SimpleCookie rememberMeCookie() {
+    // 设置cookie名称，对应login.html页面的<input type="checkbox" name="rememberMe"/>
+    SimpleCookie cookie = new SimpleCookie("rememberMe");
+    // 设置cookie的过期时间，单位为秒，这里为60秒
+    cookie.setMaxAge(60);
+    return cookie;
 }
-```
 
-## 设置授权
-
-ShiroConfig：
-
-```java
+/**
+ * 记住我的管理器，用于注册给SecurityManager
+ * @return
+ */
 @Bean
-public ShiroFilterFactoryBean getShiroFilterFactoryBean(@Qualifier("securityManager") DefaultWebSecurityManager defaultWebSecurityManager){
-    ShiroFilterFactoryBean bean = new ShiroFilterFactoryBean();
-    //设置安全管理器
-    bean.setSecurityManager(defaultWebSecurityManager);
-    //登陆拦截
-    Map<String, String> filterMap = new LinkedHashMap<>();
-    //设置进入/user/add需要user:add这个权限，正常情况下，没有授权会跳转到401
-    filterMap.put("/user/add","perms[user:add]");
-    //设置需要拦截的位置
-    filterMap.put("/user/*","authc");
-    //添加需要拦截的页面
-    bean.setFilterChainDefinitionMap(filterMap);
-    //如果验证不通过，设置登陆页面
-    bean.setLoginUrl("/toLogin");
-    //如果没有被授权，那么跳转到固定的自定义页面
-    bean.setUnauthorizedUrl("/unauth");
-    return bean;
+public CookieRememberMeManager rememberMeManager(@Qualifier("rememberMeCookie") SimpleCookie simpleCookie) {
+    CookieRememberMeManager cookieRememberMeManager = new CookieRememberMeManager();
+    cookieRememberMeManager.setCookie(simpleCookie);
+    // rememberMe cookie加密的密钥 建议每个项目都不一样 默认AES算法回自动生成 密钥长度(128 256 512 位)
+    //cookieRememberMeManager.setCipherKey(Base64.decode("3AvVhmFLUs0KTA3Kprsdag=="));
+    return cookieRememberMeManager;
+}
+
+/**
+ * 注入Shiro的安全管理器
+ * @param realmConfig
+ * @return
+ */
+@Bean
+public DefaultWebSecurityManager securityManager(@Qualifier("realm") RealmConfig realmConfig,
+                                                 @Qualifier("rememberMeManager") CookieRememberMeManager rememberMeManager){
+    DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
+    //注册自定义的Realm
+    securityManager.setRealm(realmConfig);
+    //注册记住我管理器
+    securityManager.setRememberMeManager(rememberMeManager);
+    return securityManager;
 }
 ```
 
-UserRealm：
+# 九.Session管理
+
+> 1.Shiro的Session方案与容器无关（如Servlet容器）
+>
+> 2.Shiro的Session可以定制存储位置（内存，缓存，数据库等）
+>
+> 3.用户认证也是通过Session来管理用户登陆状态
+>
+> 4.当配置了session以后，项目将默认使用shiro的session管理
+
+## 自定义Session配置
 
 ```java
-//自定义的realm
-public class UserRealm extends AuthorizingRealm {    
-	//授权
-    @Override
-    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
-        System.out.println("执行了->授权doGetAuthorizationInfo");
-        //设置简单授权
-        SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
-        //拿到当前登录的这个对象
-        Subject subject = SecurityUtils.getSubject();
-        //拿到User对象
-        User cerrentUser = (User)subject.getPrincipal();
-        //从用户中读取从数据库中去除的权限并设置为当前用户权限
-        info.addStringPermission(cerrentUser.getPerms());
-        return info;
-    }
-	//认证
-    @Override
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        System.out.println("执行了->认证doGetAuthorizationInfo");
-        UsernamePasswordToken userToken = (UsernamePasswordToken) authenticationToken;
-        //userSerice为自动注入的业务层
-        User user = userSerice.queryUserByName(userToken.getUsername());
-        //用户名认证
-        if(user==null){
-            return null;//抛出异常(UnknownAccountException)
-        }
-        //简单的密码认证，shiro自动执行
-        //可以加密:MD5和MD5盐值加密
-        return new SimpleAuthenticationInfo(user,user.getPwd,"");//将对象保存进subject中，便于授权获取
-    }
+/**
+ * 设置SessionCookie的基本属性
+ * @return
+ */
+@Bean
+public SimpleCookie sessionIdCookie() {
+    // 设置cookie名称
+    SimpleCookie cookie = new SimpleCookie("JSESSIONID");
+    // 设置cookie的过期时间，-1为存活一个会话（浏览器关闭就消失），默认为-1
+    cookie.setMaxAge(-1);
+    return cookie;
+}
+
+/**
+ * sessionmanager的基本配置
+ */
+@Bean
+public DefaultWebSessionManager sessionManager(@Qualifier("sessionIdCookie") SimpleCookie simpleCookie){
+    DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
+    //设置Cookie信息
+    sessionManager.setSessionIdCookie(simpleCookie);
+    //session全局超时时间，默认为30分钟，即1800000ms
+    sessionManager.setGlobalSessionTimeout(1800000);
+    return sessionManager;
+}
+
+/**
+ * 注入Shiro的安全管理器
+ * @param realmConfig
+ * @return
+ */
+@Bean
+public DefaultWebSecurityManager securityManager(@Qualifier("realm") RealmConfig realmConfig,
+                                                 @Qualifier("sessionManager") DefaultWebSessionManager sessionManager){
+    DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
+    //注册自定义的Realm
+    securityManager.setRealm(realmConfig);
+    //注册session管理器
+    securityManager.setSessionManager(sessionManager);
+    return securityManager;
 }
 ```
 
-## 设置用户的认证
+## 检测
 
-<font color=red>Shiro自动将login的相关操作跟认证相互关联</font>
-
-### 未集成数据库
-
-UserRealm：
+> 如果用户没有主动退出登陆，只是关闭浏览器，session是否过期无法获知，服务器也就不能停止session
+>
+> 只有等用户下次访问，服务器才会去停止session
+>
+> Shiro提供session的检测机制，识别session过期，并停止
 
 ```java
-//认证
-@Override
-protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-    //设置用户名，密码
-    String name = "root";
-    String password = "123456";
-    UsernamePasswordToken userToken = (UsernamePasswordToken) authenticationToken;
-    //用户名认证
-    if(!userToken.getUsername().equals(name)){
-        return null;//抛出异常(UnknownAccountException)
-    }
-    //密码认证，shiro自动执行
-    return new SimpleAuthenticationInfo("",password,"");
+/**
+ * sessionmanager的基本配置
+ */
+@Bean
+public DefaultWebSessionManager sessionManager(@Qualifier("rememberMeCookie") SimpleCookie simpleCookie){
+    DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
+    //开启session检测
+    sessionManager.setSessionValidationSchedulerEnabled(true);
+    //设置检测器运行间隔，默认1小时
+    sessionManager.setSessionValidationInterval(3600000);
+    return sessionManager;
 }
 ```
 
-Controller：
+# 十.Shiro注解开发
+
+## 配置
+
+在ShiroConfig中添加以下配置
 
 ```java
-@GetMapping("/login")
-public String login(String username,String password,Model model){
-    //获取当前的用户
-    Subject subject = SecurityUtils.getSubject();
-    //封装用户的登陆数据
-    UsernamePasswordToken token = new UsernamePasswordToken(username, password);
-    //执行用户的登陆并捕获异常
-    try {
-        subject.login(token);
-        return "index";
-    }catch (UnknownAccountException e){//用户名不存在
-        model.addAttribute("msg","用户名错误");
-        return "login";
-    }catch (IncorrectCredentialsException e){//密码不存在
-        model.addAttribute("msg","密码错误");
-        return "login";
-    }
+/**
+ *  开启shiro aop注解支持.否则@RequiresRoles等注解无法生效
+ *  在此Bean构建过程中初始化了一些额外功能和pointcut
+ * @param securityManager
+ * @return
+ */
+@Bean
+public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(@Qualifier("securityManager") DefaultWebSecurityManager securityManager){
+    AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();
+    authorizationAttributeSourceAdvisor.setSecurityManager(securityManager);
+    return authorizationAttributeSourceAdvisor;
+}
+
+/**
+ * Shiro生命周期处理器,管理Shrio的bean
+ * 调用工厂中Initializable类型组件的init方法
+ * @return
+ */
+@Bean
+public static LifecycleBeanPostProcessor getLifecycleBeanPostProcessor() {
+    return new LifecycleBeanPostProcessor();
+}
+
+/**
+ * Spring的一个bean , 由Advisor决定对哪些类的方法进行AOP代理
+ * 扫描上下文，寻找所有的Advistor(通知器）
+ * 必须在LifecycleBeanPostProcessor之后创建
+ * @return
+ */
+@Bean
+public static DefaultAdvisorAutoProxyCreator getDefaultAdvisorAutoProxyCreator(){
+    return new DefaultAdvisorAutoProxyCreator();
 }
 ```
 
-### 集成Mybatis数据库
+## 使用
 
-```java
-//认证
-@Override
-protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-    System.out.println("执行了->认证doGetAuthorizationInfo");
-    UsernamePasswordToken userToken = (UsernamePasswordToken) authenticationToken;
-    //userSerice为自动注入的业务层
-    User user = userSerice.queryUserByName(userToken.getUsername());
-    //用户名认证
-    if(user==null){
-        return null;//抛出异常(UnknownAccountException)
-    }
-    //简单的密码认证，shiro自动执行
-    //可以加密:MD5和MD5盐值加密
-    return new SimpleAuthenticationInfo("",user.getPwd,"");
-}
-```
+> 这些注解可以在类上也可以在方法上
+>
 
-Controller：
-
-```java
-@GetMapping("/login")
-public String login(String username,String password,Model model){
-    //获取当前的用户
-    Subject subject = SecurityUtils.getSubject();
-    //封装用户的登陆数据
-    UsernamePasswordToken token = new UsernamePasswordToken(username, password);
-    //执行用户的登陆并捕获异常
-    try {
-        subject.login(token);
-        return "index";
-    }catch (UnknownAccountException e){//用户名不存在
-        model.addAttribute("msg","用户名错误");
-        return "login";
-    }catch (IncorrectCredentialsException e){//密码不存在
-        model.addAttribute("msg","密码错误");
-        return "login";
-    }
-}
-```
+| 注解                      | 作用                           |
+| ------------------------- | ------------------------------ |
+| `@RequiresAuthentication` | 类中方法需要身份验证           |
+| `@RequiresRoles()`        | 类中方法需要角色，在参数中定制 |
+| `@RequiresUser`           | 记住我 或 身份已经验证         |
+| `@RequiresGuest`          | 游客身份                       |
+| `@RequiresPermissions()`  | 需要权限，默认是且             |
 

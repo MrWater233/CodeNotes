@@ -78,7 +78,7 @@ public void test3(){
 ```java
 @Test
 public void test3(){
-Comparator<Integer> com = (x, y) -> Integer.compare(x,y);
+	Comparator<Integer> com = (x, y) -> Integer.compare(x,y);
 }
 ```
 
@@ -319,7 +319,7 @@ List<Employee> employees = Arrays.asList(
   @Test
   public void test3() {
       List<String> list = Arrays.asList("aaa","bbb","ccc","ddd","eee");
-      //拆分字符串
+      //拆分字符串,Hello为类名
       Stream<Stream<Character>> stream = list.stream().map(Hello::filterCharacter);
       //{{a,a,a},{b,b,b},{c,c,c},{d,d,d},{e,e,e}}
       stream.forEach((sm) -> sm.forEach(System.out::println));
