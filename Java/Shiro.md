@@ -244,7 +244,7 @@ public class RealmConfig extends AuthorizingRealm {
 }
 ```
 
-# 六.ShrioConfig完整配置
+## ShrioConfig完整配置
 
 ```java
 @Configuration
@@ -307,7 +307,7 @@ public class ShrioConfig {
 }
 ```
 
-# 七.加密
+# 六.加密
 
 > 为了安全考虑，一般数据库中存入用户**不可逆**的加密密码
 
@@ -440,7 +440,7 @@ public Integer insertUser(User user) {
    }
    ```
 
-#  八.记住我
+#  七.记住我
 
 > 登陆后将用户信息保存在Cookie中，下次访问不用登陆就可以识别身份
 
@@ -509,7 +509,7 @@ public DefaultWebSecurityManager securityManager(@Qualifier("realm") RealmConfig
 }
 ```
 
-# 九.Session管理
+# 八.Session管理
 
 > 1.Shiro的Session方案与容器无关（如Servlet容器）
 >
@@ -588,7 +588,7 @@ public DefaultWebSessionManager sessionManager(@Qualifier("rememberMeCookie") Si
 }
 ```
 
-# 十.Shiro注解开发
+# 九.Shiro注解开发
 
 ## 配置
 
