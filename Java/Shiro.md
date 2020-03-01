@@ -515,9 +515,9 @@ public DefaultWebSecurityManager securityManager(@Qualifier("realm") RealmConfig
 >
 > 2.Shiro的Session可以定制存储位置（内存，缓存，数据库等）
 >
-> 3.用户认证也是通过Session来管理用户登陆状态
+> 3.用户认证也是通过Session来管理用户登陆状态，Session存储在服务器的缓存中
 >
-> 4.当配置了session以后，项目将默认使用shiro的session管理
+> 4.当配置了session以后，使用HttpSession获取的session将会和subject获取的缓存相同
 
 ## 自定义Session配置
 
