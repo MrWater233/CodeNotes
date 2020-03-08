@@ -1249,9 +1249,772 @@ public class test {}
    }
    ```
 
-### <span id="advice">3.2.3 四种常用通知类型</span>
+#### <span id="advice">四种常用通知类型</span>
 
 1. 前置通知：`<aop:before>`
 2. 后置通知：`<aop:after-returning>`
 3. 异常通知：`<aop:after-throwing>`
 4. 最终通知：`<aop:after>`
+
+#### 通用化切入点表达式
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        https://www.springframework.org/schema/aop/spring-aop.xsd">
+    <!--配置IOC-->
+    <bean id="accountService" class="com.spring.service.impl.AccountServiceImpl"></bean>
+
+    <!--Spring中基于XML的AOP配置步骤-->
+    <!--1.配置通知类-->
+    <bean id="logger" class="com.spring.utils.Logger"></bean>
+    <!--2.配置AOP-->
+    <aop:config>
+        <!--3.配置切面-->
+        <aop:aspect id="logAdvice" ref="logger">
+            <!--4.1 配置前置通知-->
+            <aop:before method="beforePrintLog" pointcut-ref="pt1"></aop:before>
+            <!--4.2 配置后置通知-->
+            <aop:after-returning method="afterReturningPrintLog" pointcut-ref="pt1"></aop:after-returning>
+            <!--4.3 配置异常通知-->
+            <aop:after-throwing method="afterThrowingPrintLog" pointcut-ref="pt1"></aop:after-throwing>
+            <!--4.4 配置最终通知-->
+            <aop:after method="afterPrintLog" pointcut-ref="pt1"></aop:after>
+            <!--配置切入点表达式
+            id属性指定表达式唯一属性,expression属性指定表达式内容
+            1.写在aop:aspect内部只能当前标签使用
+            2.写在aop:aspect外部（必须写在引用切面之前），让所有切面可用
+            -->
+            <aop:pointcut id="pt1" expression="execution(* com.spring.service.impl.*.*(..))"/>
+        </aop:aspect>
+    </aop:config>
+</beans>
+```
+
+#### 环绕通知
+
+> 实质：他是Spring提供在代码中控制增强方法何时执行的方法
+>
+> 相当于动态代理的接口实现方法
+
+1. `com.spring.utils.Logger`
+
+   ```java
+   public class Logger {
+       /**
+        * 环绕通知
+        * Spring为我们提供一个接口ProceedingJoinPoint，接口中有一个proceed()，此方法相当于切入点调用方法。
+        * 该接口可以作为环绕通知的方法参数，在程序执行时，Spring为我们提供接口的实现类使用
+        */
+       public Object aroundPrintLog(ProceedingJoinPoint pjp){
+           Object returnValue = null;
+           try {
+               //得到切入点方法执行的参数
+               Object[] args = pjp.getArgs();
+               //前置通知
+               System.out.println("环绕通知中的前置通知");
+               //调用切入点方法
+               returnValue = pjp.proceed(args);
+               //后置通知
+               System.out.println("环绕通知中的后置通知");
+           } catch (Throwable throwable) {
+               //异常通知
+               System.out.println("环绕通知中的异常通知");
+               throwable.printStackTrace();
+           }finally {
+               //最终通知
+               System.out.println("环绕通知中的最终通知");
+               return returnValue;
+           }
+       }
+   }
+   ```
+
+2. `beam.xml`
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <beans xmlns="http://www.springframework.org/schema/beans"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:aop="http://www.springframework.org/schema/aop"
+          xsi:schemaLocation="http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop
+           https://www.springframework.org/schema/aop/spring-aop.xsd">
+       <!--配置IOC-->
+       <bean id="accountService" class="com.spring.service.impl.AccountServiceImpl"></bean>
+   
+       <!--Spring中基于XML的AOP配置步骤-->
+       <!--1.配置通知类-->
+       <bean id="logger" class="com.spring.utils.Logger"></bean>
+       <!--2.配置AOP-->
+       <aop:config>
+           <!--通用切入表达式-->
+           <aop:pointcut id="pt1" expression="execution(* com.spring.service.impl.*.*(..))"/>
+           <!--3.配置切面-->
+           <aop:aspect id="logAdvice" ref="logger">
+               <aop:around method="aroundPrintLog" pointcut-ref="pt1"></aop:around>
+           </aop:aspect>
+       </aop:config>
+   </beans>
+   ```
+
+### 3.2.3 基于注解的AOP配置
+
+> Spring注解的后置通知和异常通知会出现顺序问题
+>
+> 环绕通知不会有问题
+
+加入了`xmlns:context="http://www.springframework.org/schema/aop"`命名空间
+
+`bean.xml`
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        https://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd">
+    <!--配置Spring创建容器时要扫描的包-->
+    <context:component-scan base-package="com.spring"></context:component-scan>
+    <!--配置Spring开启注解AOP支持-->
+    <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+</beans>
+```
+
+#### @Aspect
+
+- 作用：表明当前类时切面类
+
+#### @Pointcut
+
+- 作用：指定切入点表达式
+- 参数：切入点表达式
+
+#### @Before
+
+- 作用：表明当前通知是前置通知
+- 参数：切入表达式的方法
+
+#### @AfterReturning
+
+- 作用：表明当前通知是后置通知
+- 参数：切入表达式的方法
+
+#### @AfterThrowing
+
+- 作用：表明当前通知是异常通知
+- 参数：切入表达式的方法
+
+#### @After
+
+- 作用：表明当前通知时最终通知
+- 参数：切入表达式的方法
+
+#### @Around
+
+- 作用：表明当前通知时环绕通知
+- 参数：切入表达式的方法
+
+```java
+@Component("logger")
+@Aspect
+public class Logger {
+    /**
+    * 切入表达式
+    */
+    @Pointcut("execution(* com.spring.service.impl.*.*(..))")
+    private void pt1(){}
+    
+    /**
+     * 前置通知
+     */
+    @Before("pt1()")
+    public void beforePrintLog() {
+        System.out.println("前置通知：Logger中的beforePrintLog方法开始记录日志");
+    }
+
+    /**
+     * 后置通知
+     */
+    @AfterReturning("pt1()")
+    public void afterReturningPrintLog() {
+        System.out.println("后置通知：Logger中的afterPrintLog方法开始记录日志");
+    }
+
+    /**
+     * 异常通知
+     */
+    @AfterThrowing("pt1()")
+    public void afterThrowingPrintLog() {
+        System.out.println("异常通知：Logger中的afterThrowingPrintLog方法开始记录日志");
+    }
+
+    /**
+     * 最终通知
+     */
+    @After("pt1()")
+    public void afterPrintLog() {
+        System.out.println("最终通知：Logger中的finallyPrintLog方法开始记录日志");
+    }
+
+    /**
+     * 环绕通知
+     * Spring为我们提供一个接口ProceedingJoinPoint，接口中有一个proceed()，此方法相当于切入点调用方法。
+     * 该接口可以作为环绕通知的方法参数，在程序执行时，Spring为我们提供接口的实现类使用
+     */
+    @Around("pt1()")
+    public Object aroundPrintLog(ProceedingJoinPoint pjp){
+        Object returnValue = null;
+        try {
+            //得到切入点方法执行的参数
+            Object[] args = pjp.getArgs();
+            //前置通知
+            System.out.println("环绕通知中的前置通知");
+            //调用切入点方法
+            returnValue = pjp.proceed(args);
+            //后置通知
+            System.out.println("环绕通知中的后置通知");
+        } catch (Throwable throwable) {
+            //异常通知
+            System.out.println("环绕通知中的异常通知");
+            throwable.printStackTrace();
+        }finally {
+            //最终通知
+            System.out.println("环绕通知中的最终通知");
+            return returnValue;
+        }
+    }
+}
+```
+
+#### 不使用XML的配置方式
+
+在配置类上加上`@EnableAspectJAutoProxy`，再用注解context加载配置类即可
+
+#### 补充
+
+- 通知注解上的value和pointcut作用相同，都是用来指定确如表达式，当有pointcut时value会被覆盖
+
+- 在普通通知中获取切入点方法
+
+  `JoinPoint`是`ProceedingJoinPoint`父类，没有执行切点的`proceed`方法
+
+  ```java
+  @AfterReturning(value = "execution(* com.spring.service.impl.*.*(..))")
+  public void afterReturningPrintLog(JoinPoint jp) {
+      //获取切入点参数
+      Object[] args = jp.getArgs();
+  }
+  ```
+
+- 在普通通知里面获取切入点异常
+
+  ```java
+  @AfterThrowing(value = "execution(* com.spring.service.impl.*.*(..))",throwing = "exception")
+  public void afterThrowingPrintLog(Exception exception) {
+      System.out.println("异常为:"+exception);
+  }
+  ```
+
+- 在普通通知里面获取切入点返回值
+
+  ```java
+  @AfterReturning(value = "execution(* com.spring.service.impl.*.*(..))", returning = "result")
+  public void afterReturningPrintLog(Object result) {
+      System.out.println("切入点返回值为：" + result);
+  }
+  ```
+
+- [多切面问题](https://blog.csdn.net/single_wolf_wolf/article/details/81778879)
+
+# 四.事务
+
+## 4.1 依赖
+
+```xml
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-tx</artifactId>
+    <version>5.2.4.RELEASE</version>
+</dependency>
+```
+
+## 4.2 Spring基于XML的事务控制
+
+1. <span id="account">`com.spring.domain.Account`</span>
+
+   ```java
+   @Data
+   public class Account implements Serializable {
+       private Integer id;
+       private String name;
+       private Float money;
+   }
+   ```
+
+2. `com.spring.dao.impl.AccountDaoImpl`
+
+   ```java
+   public class AccountDaoImpl  extends JdbcDaoSupport implements IAccountDao{
+   
+       @Override
+       public Account findAccountById(Integer id) {
+           List<Account> accounts = getJdbcTemplate().query("select *from account where id=?", new BeanPropertyRowMapper<Account>(Account.class), id);
+           return accounts.isEmpty() ? null : accounts.get(0);
+       }
+   
+       @Override
+       public Account findAccountByName(String accountName) {
+           List<Account> accounts = getJdbcTemplate().query("select *from account where name=?", new BeanPropertyRowMapper<Account>(Account.class), accountName);
+           if (accounts.isEmpty()) {
+               return null;
+           }
+           if (accounts.size() > 1) {
+               throw new RuntimeException("结果集不唯一");
+           }
+           return accounts.get(0);
+       }
+   
+       @Override
+       public void updateAccount(Account account) {
+           getJdbcTemplate().update("update account set name=?,money=? where id=?", account.getName(), account.getMoney(), account.getId());
+       }
+   }
+   ```
+
+3. `com.spring.service.impl.AccountServiceImpl`
+
+   ```java
+   public class AccountServiceImpl implements IAccountService {
+       private IAccountDao accountDao;
+       
+       public void setAccountDao(IAccountDao accountDao) {
+           this.accountDao = accountDao;
+       }
+   
+       @Override
+       public Account findAccountById(Integer id) {
+           return accountDao.findAccountById(id);
+       }
+   
+       @Override
+       public void transfer(String sourceName, String targetName, Float money) {
+           //1.根据名称查询转出账户
+           Account source = accountDao.findAccountByName(sourceName);
+           //2.根据名称查询转入账户
+           Account target = accountDao.findAccountByName(targetName);
+           //3.转出账户减钱
+           source.setMoney(source.getMoney()-money);
+           //4.转入账户加钱
+           target.setMoney(target.getMoney()+money);
+           //5.更新转出账户
+           accountDao.updateAccount(source);
+           //人为发生异常
+           int i = 1/0;
+           //5.更新转入账户
+           accountDao.updateAccount(target);
+       }
+   }
+   ```
+
+4. XML配置
+
+   1. XML的命名空间
+
+      ```xml
+      <?xml version="1.0" encoding="UTF-8"?>
+      <beans xmlns="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:aop="http://www.springframework.org/schema/aop"
+             xmlns:tx="http://www.springframework.org/schema/tx"
+             xsi:schemaLocation="
+              http://www.springframework.org/schema/beans
+              https://www.springframework.org/schema/beans/spring-beans.xsd
+              http://www.springframework.org/schema/tx
+              https://www.springframework.org/schema/tx/spring-tx.xsd
+              http://www.springframework.org/schema/aop
+              https://www.springframework.org/schema/aop/spring-aop.xsd">
+      </beans>
+      ```
+
+   2. 配置事务管理器，需要指定数据源
+
+      ```xml
+      <!--数据源配置-->
+      <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+          <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+          <property name="url" value="jdbc:mysql://localhost:3306/test?serverTimezone=GMT%2B8"/>
+          <property name="username" value="root"/>
+          <property name="password" value="123456"/>
+      </bean>
+      <!--配置事务管理器-->
+      <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+          <property name="dataSource" ref="dataSource"/>
+      </bean>
+      ```
+
+   3. 配置事务通知器
+
+      - 此时需要导入事务的约束
+
+      - 使用`<tx:advice>`标签配置事务通知
+
+        - 属性：
+
+          - id：给事务通知器一个唯一标识
+          - transaction-manager：给事务通知器一个事务管理器的引用
+
+        - 配置事务的属性，`<tx:attributes>`中的`<tx:method>`标签
+
+          - <span id="transactional">属性：</span>
+
+            - name：需要添加事务的方法名，可以使用通配符`*`
+
+              如：`find*`表示所有以find开头的方法，或者`*`表示所有方法。优先范围小的
+
+            - isolation：指定事务的隔离级别，默认时DEFAULT，表示使用数据库的默认隔离级别
+
+            - propagation：指定事务的传播行为。默认值是REQUIRED，表示一定会有事务，增删改选；
+
+              查询可选SUPPORTS
+
+            - read-only：用于指定事务是否只读，默认为false（读写）；只有查询才设置为true
+
+            - timeout：用于指定事务的超时时间，默认为-1，表示永不超时，如果指定数值以秒为单位
+
+            - rollback-for：用于指定一个异常，当产生该异常时事务回滚，其他异常事务不回滚
+
+              默认值表示任何异常都回滚
+
+            - no-rollback-for：用于指定一个异常，当产生该异常时事务不会滚，其他异常事务回滚
+
+              默认值表示任何异常都回滚
+
+      ```xml
+      <!--配置事务的通知，此时需要导入事务的约束，tx和aop的都需要-->
+      <tx:advice id="txAdvice" transaction-manager="transactionManager">
+          <!--配置事务的属性-->
+          <tx:attributes>
+              <tx:method name="*" propagation="REQUIRED" read-only="false"/>
+              <tx:method name="find*" propagation="SUPPORTS" read-only="true"/>
+          </tx:attributes>
+      </tx:advice>
+      ```
+
+   4. 配置AOP中的通用切入点表达式，指定所有业务层方法
+
+      建立事务通知和切入表达式的对应关系
+
+      ```xml
+      <!--配置AOP-->
+      <aop:config>
+          <!--配置切入点表达式-->
+          <aop:pointcut id="pt1" expression="execution(* com.spring.service.impl.*.*(..))"/>
+          <!--建立事务通知和切入表达式的对应关系-->
+          <aop:advisor advice-ref="txAdvice" pointcut-ref="pt1"/>
+      </aop:config>
+      ```
+
+   完整配置：
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <beans xmlns="http://www.springframework.org/schema/beans"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:aop="http://www.springframework.org/schema/aop"
+          xmlns:tx="http://www.springframework.org/schema/tx"
+          xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/tx
+           https://www.springframework.org/schema/tx/spring-tx.xsd
+           http://www.springframework.org/schema/aop
+           https://www.springframework.org/schema/aop/spring-aop.xsd">
+       <!--业务层-->
+       <bean id="accountService" class="com.spring.service.impl.AccountServiceImpl">
+           <property name="accountDao" ref="accountDao"/>
+       </bean>
+   
+       <!--Dao层-->
+       <bean id="accountDao" class="com.spring.dao.impl.AccountDaoImpl">
+           <property name="dataSource" ref="dataSource"/>
+       </bean>
+   
+       <!--数据源配置-->
+       <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+           <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+           <property name="url" value="jdbc:mysql://localhost:3306/test?serverTimezone=GMT%2B8"/>
+           <property name="username" value="root"/>
+           <property name="password" value="w327191248"/>
+       </bean>
+   
+       <!--Spring中基于XML的声明式事务控制-->
+       <!--1.配置事务管理器-->
+       <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+           <property name="dataSource" ref="dataSource"/>
+       </bean>
+       <!--2.配置事务的通知，此时需要导入事务的约束，tx和aop的都需要-->
+       <tx:advice id="txAdvice" transaction-manager="transactionManager">
+           <!--配置事务的属性-->
+           <tx:attributes>
+               <tx:method name="*" propagation="REQUIRED" read-only="false"/>
+               <tx:method name="find*" propagation="SUPPORTS" read-only="true"/>
+           </tx:attributes>
+       </tx:advice>
+       <!--3.配置AOP-->
+       <aop:config>
+           <!--配置切入点表达式-->
+           <aop:pointcut id="pt1" expression="execution(* com.spring.service.impl.*.*(..))"/>
+           <!--4.建立事务通知和切入表达式的对应关系-->
+           <aop:advisor advice-ref="txAdvice" pointcut-ref="pt1"/>
+       </aop:config>
+   </beans>
+   ```
+
+## 4.3 Spring基于注解的事务控制
+
+1. `com.spring.domain.Account`[同上](#account)
+
+2. `com.spring.dao.impl.AccountDaoImpl`
+
+   ```java
+   @Repository("accountDao")
+   public class AccountDaoImpl implements IAccountDao{
+       @Autowired
+       private JdbcTemplate jdbcTemplate;
+   
+       @Override
+       public Account findAccountById(Integer id) {
+           List<Account> accounts = jdbcTemplate.query("select *from account where id=?", new BeanPropertyRowMapper<Account>(Account.class), id);
+           return accounts.isEmpty() ? null : accounts.get(0);
+       }
+   
+       @Override
+       public Account findAccountByName(String accountName) {
+           List<Account> accounts = jdbcTemplate.query("select *from account where name=?", new BeanPropertyRowMapper<Account>(Account.class), accountName);
+           if (accounts.isEmpty()) {
+               return null;
+           }
+           if (accounts.size() > 1) {
+               throw new RuntimeException("结果集不唯一");
+           }
+           return accounts.get(0);
+       }
+   
+       @Override
+       public void updateAccount(Account account) {
+           jdbcTemplate.update("update account set name=?,money=? where id=?", account.getName(), account.getMoney(), account.getId());
+       }
+   }
+   ```
+
+3. `com.spring.service.impl.AccountServiceImpl`
+
+   使用`@Transactional`可以配置在类上或者方法上开启事务，[具体参数](#transactional)
+
+   ```java
+   @Service("accountService")
+   @Transactional(propagation = Propagation.SUPPORTS,readOnly = true)
+   public class AccountServiceImpl implements IAccountService {
+       @Autowired
+       private IAccountDao accountDao;
+   
+       @Override
+       public Account findAccountById(Integer id) {
+           return accountDao.findAccountById(id);
+       }
+   
+       @Override
+       @Transactional(propagation = Propagation.REQUIRED,readOnly = false)
+       public void transfer(String sourceName, String targetName, Float money) {
+           //1.根据名称查询转出账户
+           Account source = accountDao.findAccountByName(sourceName);
+           //2.根据名称查询转入账户
+           Account target = accountDao.findAccountByName(targetName);
+           //3.转出账户减钱
+           source.setMoney(source.getMoney()-money);
+           //4.转入账户加钱
+           target.setMoney(target.getMoney()+money);
+           //5.更新转出账户
+           accountDao.updateAccount(source);
+           //人为发生异常
+           int i = 1/0;
+           //5.更新转入账户
+           accountDao.updateAccount(target);
+       }
+   }
+   ```
+
+4. XML命名空间
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <beans xmlns="http://www.springframework.org/schema/beans"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:aop="http://www.springframework.org/schema/aop"
+          xmlns:tx="http://www.springframework.org/schema/tx"
+          xmlns:context="http://www.springframework.org/schema/context"
+          xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/tx
+           https://www.springframework.org/schema/tx/spring-tx.xsd
+           http://www.springframework.org/schema/aop
+           https://www.springframework.org/schema/aop/spring-aop.xsd
+           http://www.springframework.org/schema/context
+           https://www.springframework.org/schema/context/spring-context.xsd">
+   </beans>
+   ```
+
+   配置：
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <beans xmlns="http://www.springframework.org/schema/beans"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:aop="http://www.springframework.org/schema/aop"
+          xmlns:tx="http://www.springframework.org/schema/tx"
+          xmlns:context="http://www.springframework.org/schema/context"
+          xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/tx
+           https://www.springframework.org/schema/tx/spring-tx.xsd
+           http://www.springframework.org/schema/aop
+           https://www.springframework.org/schema/aop/spring-aop.xsd
+           http://www.springframework.org/schema/context
+           https://www.springframework.org/schema/context/spring-context.xsd">
+       <!--配置Spring创建容器时要扫描的包-->
+       <context:component-scan base-package="com.spring"></context:component-scan>
+   	
+       <!--配置JdbcTemplate使用-->
+       <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+           <property name="dataSource" ref="dataSource"></property>
+       </bean>
+   
+       <!--数据源配置-->
+       <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+           <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+           <property name="url" value="jdbc:mysql://localhost:3306/test?serverTimezone=GMT%2B8"/>
+           <property name="username" value="root"/>
+           <property name="password" value="w327191248"/>
+       </bean>
+   
+       <!--1.配置事务管理器-->
+       <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+           <property name="dataSource" ref="dataSource"/>
+       </bean>
+   
+       <!--2.开启Spring对注解事务的支持-->
+       <tx:annotation-driven transaction-manager="transactionManager"></tx:annotation-driven>
+   
+   </beans>
+   ```
+
+### 4.3.1 无XML的注解事务控制
+
+> 使用代码代替bean.xml
+
+- 主配置类
+
+  `com.spring.config.SpringConfiguration`
+
+  ```java
+  /**
+   * 1.声明配置类
+   * 2.配置Spring创建容器时要扫描的包
+   * 3.声明子配置类
+   * 4.声明配置文件
+   * 5.开启注解事务支持
+   */
+  @Configuration
+  @ComponentScan("com.spring")
+  @Import({JdbcConfig.class,TransactionConfig.class})
+  @PropertySource(value = "jdbcConfig.properties")
+  @EnableTransactionManagement
+  public class SpringConfiguration {
+  }
+  ```
+
+- 事务相关配置类
+
+  `com.spring.config.TransactionConfig`
+
+  ```java
+  public class TransactionConfig {
+      /**
+       * 用于创建事务管理器对象
+       * @param dataSource
+       * @return
+       */
+      @Bean(name="transactionManager")
+      public PlatformTransactionManager createPlatformTransactionManager(DataSource dataSource){
+          return new DataSourceTransactionManager(dataSource);
+      }
+  }
+  ```
+
+- 连接数据库相关配置类
+
+  `com.spring.config.JdbcConfig`
+
+  ```java
+  public class JdbcConfig {
+      @Value("${jdbc.driver}")
+      private String driver;
+      @Value("${jdbc.url}")
+      private String url;
+      @Value("${jdbc.username}")
+      private String username;
+      @Value("${jdbc.password}")
+      private String password;
+  
+      /**
+       * 创建JdbcTemplate对象
+       * @param dataSource
+       * @return
+       */
+      @Bean(name = "jdbcTemplate")
+      public JdbcTemplate createJdbcTemplate(DataSource dataSource){
+          return new JdbcTemplate(dataSource);
+      }
+  
+      /**
+       * 配置数据源
+       * @return
+       */
+      @Bean(name = "dataSource")
+      public DataSource createDataSource(){
+          DriverManagerDataSource dataSource = new DriverManagerDataSource();
+          dataSource.setDriverClassName(driver);
+          dataSource.setUrl(url);
+          dataSource.setUsername(username);
+          dataSource.setPassword(password);
+          return dataSource;
+      }
+  }
+  ```
+
+  `resources.jdbcConfig.properties`
+
+  ```properties
+  jdbc.driver=com.mysql.cj.jdbc.Driver
+  jdbc.url=jdbc:mysql://localhost:3306/test?serverTimezone=GMT%2B8
+  jdbc.username=root
+  jdbc.password=123456
+  ```
+
+  
+
