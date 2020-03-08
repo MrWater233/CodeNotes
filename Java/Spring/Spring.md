@@ -1160,7 +1160,7 @@ public class test {}
            - id：切面的唯一标志
            - ref：指定通知类Bean的id
 
-      2. 在aspect标签内配置[通知的类型](#3.2.3 四种常用通知类型)，建立通知方法和切入点之间的关系
+      2. 在aspect标签内配置[通知的类型](#advice)，建立通知方法和切入点之间的关系
 
          如`<aop:before>`前置通知
 
@@ -1249,7 +1249,7 @@ public class test {}
    }
    ```
 
-### 3.2.3 四种常用通知类型
+### <span id="advice">3.2.3 四种常用通知类型</span>
 
 1. 前置通知：`<aop:before>`
 2. 后置通知：`<aop:after-returning>`
