@@ -220,6 +220,8 @@ spring:
 
 3. service层
 
+   **注意**：jpa的分页从第0页开始
+   
    `com.springbootelasticsearch.service.Impl.BookServiceImpl`
    
    ```java
