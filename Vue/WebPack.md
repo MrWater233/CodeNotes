@@ -190,9 +190,9 @@
    ```
 
 
-# 三.webpack文件处理
+# 三.loader加载器
 
-> webpack对js之外的文件进行打包时需要安装对应的loader
+> webpack对js之外的文件进行借在打包时需要安装对应的loader
 >
 > [loader](https://www.webpackjs.com/loaders/)
 
@@ -330,6 +330,7 @@
 
    ```javascript
    module.exports = {
+     ...
      module: {
        rules: [
          {
@@ -405,21 +406,244 @@
 2. 配置`webpack.config.js`
 
    ```javascript
-   module: {
-     rules: [
-       {
-         test: /\.js$/,
-         exclude: /(node_modules|bower_components)/,
-         use: {
-           loader: 'babel-loader',
-           options: {
-             presets: ['es2015']
+   module.exports = {
+     ...
+     module: {
+       rules: [
+         {
+           test: /\.js$/,
+           exclude: /(node_modules|bower_components)/,
+           use: {
+             loader: 'babel-loader',
+             options: {
+               presets: ['es2015']
+             }
            }
          }
-       }
-     ]
+       ]
+     }
    }
    ```
 
 # 五.配置Vue
+
+## 基础配置
+
+1. 安装Vue
+
+   ```shell
+   npm install vue --save
+   ```
+
+2. 配置`webpack.config.js`
+
+   默认使用`runtime-only`：代码中不能有`template`
+
+   配置以后使用`runtime-compiler`：代码中可以有`template`，因为compiler可以用于编译`template`
+
+   ```javascript
+   module.exports = {  
+     ...
+     resolve: {
+       alias: {
+         'vue$': 'vue/dist/vue.esm.js'
+       }
+     }
+   }
+   ```
+
+3. 编写`main.js`
+
+   ```javascript
+   //导入Vue
+   import Vue from 'vue';
+   
+   new Vue({
+     el: '#app',
+     data: {
+       message: 'Hello webpack'
+     }
+   });
+   ```
+
+4. 编写`index.html`
+
+   ```html
+   <div id="app">{{message}}</div>
+   ```
+
+5. 打包
+
+   ```shell
+   npm run build
+   ```
+
+## 组件化
+
+> 在实际的开发项目中`index.html`一般不做修改，需要在组件中进行编写
+>
+> 如果一个Vue实例有template属性，Vue将template的内容替换el在`index.html`指定的div中
+
+- `main.js`
+
+  - 原型：
+
+    ```javascript
+    import Vue from 'vue';
+    
+    const app = new Vue({
+      el: '#app',
+      template: `
+      <div>
+        {{message}}
+      </div>
+      `,
+      data: {
+        message: 'Hello webpack'
+      }
+    });
+    ```
+
+  - 组件化：
+
+    - 抽取组件
+
+      `src/vue/cpn.js`
+
+      ```javascript
+      //编写并导出组件
+      export default {
+        template: `
+          <div>
+            {{message}}
+          </div>
+          `,
+        data() {
+          return {
+            message: 'Hello webpack'
+          }
+        }
+      }
+      ```
+
+    - 将组件的引用放在了Vue的template中
+
+      `main.js`
+
+      ```javascript
+      import Vue from 'vue';
+      import cpn from './vue/cpn.js'
+      
+      new Vue({
+        el: '#app',
+        //导入组件
+        template: '<cpn/>',
+        components: {
+          cpn
+        }
+      });
+      ```
+
+  - 实现Vue组件化：
+
+    - 安装loader，实现对`.vue`文件的加载和编译
+
+      ```shell
+      npm install vue-loader vue-template-compiler --save-dev
+      ```
+
+    - 配置`webpack.config.js`
+
+      [官网配置](https://vue-loader.vuejs.org/zh/guide/#vue-cli)
+
+      ```javascript
+      const VueLoaderPlugin = require('vue-loader/lib/plugin')
+      
+      module.exports = {
+        ...
+        module: {
+          rules: [
+            {
+              test: /\.vue$/,
+              use: ['vue-loader']
+            }
+          ]
+        },
+        resolve:{
+          //import时可以省略.vue
+          extensions:['.vue'],
+          //别名，使用runtime-compiler
+          alias:{
+            'vue$': 'vue/dist/vue.esm.js'
+          }
+        },
+        plugins: [
+          // 请确保引入这个插件！
+          new VueLoaderPlugin()
+        ]
+      }
+      ```
+
+    - 编写Vue风格的组件
+
+      `src/vue/cpn.vue`
+
+      ```vue
+      <template>
+        <div>{{message}}</div>
+      </template>
+      
+      <script>
+      export default {
+        data() {
+          return {
+            message: "Hello webpack"
+          };
+        }
+      };
+      </script>
+      
+      <style scoped>
+      </style>
+      ```
+
+    - `main.js`
+
+      ```javascript
+      import Vue from 'vue';
+      import cpn from './vue/cpn.vue'
+      
+      new Vue({
+        el: '#app',
+        template: '<cpn/>',
+        components: {
+          cpn
+        }
+      });
+      ```
+
+- `index.html`
+
+  ```html
+  <div id="app"></div>
+  ```
+
+# 六.plugin扩展器
+
+> plugin可以对webpack进行扩充，如打包优化或者增加版权声明等
+
+版权申明插件：
+
+`webpack.config.js`
+
+```javascript
+const webpack = require('webpack')
+
+module.exports = {
+  ...
+  plugins: [
+    new webpack.BannerPlugin('最终版权归小明所有')
+  ]
+}
+```
 
