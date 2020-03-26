@@ -596,8 +596,12 @@ public DefaultWebSessionManager sessionManager(@Qualifier("rememberMeCookie") Si
 
 ```java
 /**
- *  开启shiro aop注解支持.否则@RequiresRoles等注解无法生效
- *  在此Bean构建过程中初始化了一些额外功能和pointcut
+ * 他是Shiro自定义的Advisor（顾问/通知器）
+ * 里面包含切入点和advice（通知，即增强方法）
+ * 切入点：有权限注解的方法
+ * 通知：进行权限校验拦截
+ * 依靠DefaultAdvisorAutoProxyCreator扫描容器内所有的Bean
+ *
  * @param securityManager
  * @return
  */
@@ -619,8 +623,9 @@ public static LifecycleBeanPostProcessor getLifecycleBeanPostProcessor() {
 }
 
 /**
- * Spring的一个bean , 由Advisor决定对哪些类的方法进行AOP代理
+ * 自动代理生成器，会自动扫描容器内所有的Bean，再由通知器进行筛选和织入
  * 扫描上下文，寻找所有的Advistor(通知器）
+ * 由Advisor决定对容器中哪些类的方法进行AOP代理
  * 必须在LifecycleBeanPostProcessor之后创建
  * @return
  */
