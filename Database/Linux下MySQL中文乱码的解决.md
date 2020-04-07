@@ -1,4 +1,4 @@
-1. 登陆Mysql后可以使用`SHOW VARIABLES LIKE 'character%'`查看字符集
+1. 登陆Mysql后可以使用`SHOW VARIABLES LIKE 'character%';`查看字符集
 
    ```shell
    +--------------------------+----------------------------+
@@ -39,29 +39,23 @@
    增加或者修改以下内容
 
    ```cnf
-   # 1、在[client]字段里加入default-character-set=utf8，如下：
-    
    [client]
    port = 3306
    socket = /var/lib/mysql/mysql.sock
    default-character-set=utf8
-    
-   # 2、在[mysqld]字段里加入character-set-server=utf8，如下：
-    
+   
    [mysqld]
    port = 3306
    socket = /var/lib/mysql/mysql.sock
    character-set-server=utf8
-    
-   # 3、在[mysql]字段里加入default-character-set=utf8，如下：
-    
+   
    [mysql]
    no-auto-rehash
    default-character-set=utf8
    ```
-
+   
 4. 重启Mysql
 
    `service mysql restart`
 
-5. 再次登陆Mysql通过`SHOW VARIABLES LIKE 'character%'`查看编码发现都变为utf8就成功了
+5. 再次登陆Mysql通过`SHOW VARIABLES LIKE 'character%';`查看编码发现都变为utf8就成功了
