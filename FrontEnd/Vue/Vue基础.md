@@ -637,7 +637,7 @@ new Vue({
     ```html
     <body>
       <div id="app">
-        <!-- 给子组件对应属性传参 -->
+        <!-- 给子组件对应属性传父组件属性 -->
         <cpn :cmovies="movies"></cpn>
       </div>
     
@@ -670,7 +670,7 @@ new Vue({
     ```html
     <body>
       <div id="app">
-        <!-- 给子组件对应属性传参 -->
+        <!-- 给子组件对应属性传父组件属性 -->
         <cpn :cmovies="movies" :cmsg="msg"></cpn>
       </div>
     
