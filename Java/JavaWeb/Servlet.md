@@ -48,7 +48,7 @@
 
 - 如果在覆写service方法的时候调用父类的service的方法，则会在service方法执行完以后调用相应的get/post方法
 
-- 一般不在service中调用父类的service方法， 避免法僧405错误，因为调用父类的service方法就必须重写DoGet和DoPost方法
+- 一般不在service中调用父类的service方法， 避免发生405错误，因为调用父类的service方法就必须重写DoGet和DoPost方法
 
 ### Request对象
 
