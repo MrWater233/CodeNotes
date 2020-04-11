@@ -70,9 +70,9 @@
 6. 查看Redis主从状态
 
    ```shell
-# 进入哨兵容器
+   进入哨兵容器
    docker exec -it 容器名/容器ID redis-cli
-# 查看主从状态
+   查看主从状态
    info replication
    ```
 
@@ -110,7 +110,7 @@
    -d redis redis-sentinel /usr/local/etc/redis/sentinel.conf
    ```
 
-以上方法针对只有一个哨兵的情况，这时候哨兵也有可能宕机，导致无法及时切换主机
+以上方法针对只有一个哨兵的情况，这时候哨兵也有可能宕机，导致无法故障恢复
 
 ## 多哨兵
 
