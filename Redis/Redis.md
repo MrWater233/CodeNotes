@@ -391,5 +391,7 @@
 
 > 哨兵监控主机是否故障，如果主机故障，从机根据投票数自动转为主机
 
+![](https://raw.githubusercontent.com/MrWater233/PictureHost/master/20200411212402.png)
+
 - 如果主机宕机，从机完成选举以后，主机重新上线后会变为从机
 - 一组哨兵能够监控多组master

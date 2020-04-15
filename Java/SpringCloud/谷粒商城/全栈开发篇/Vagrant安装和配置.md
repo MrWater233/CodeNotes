@@ -73,7 +73,7 @@
 
 2. 更改创建box路径下生成的`Vagrantfile`文件
 
-   将56行ip改为第1步同一网段即可，如👇
+   将35行ip改为第1步同一网段即可，如👇
 
    ```
    config.vm.network "private_network", ip: "192.168.56.10"
