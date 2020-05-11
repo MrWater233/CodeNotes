@@ -85,7 +85,7 @@
 | 方法                                    | 作用                             |
 | --------------------------------------- | -------------------------------- |
 | `String getParameter(String s)`         | 通过键s来获取一个值              |
-| `String[] getParameterValues(String s)` | 获取桶一个键的不同value数组      |
+| `String[] getParameterValues(String s)` | 获取同一个键的不同value数组      |
 | `Enumeration getParameterNames()`       | 返回所有用户请求数据键的枚举集合 |
 
 虽然`get`和`post`的用户数据放置位置不同，但是通过这个函数都可以获取到用户的数据 。
