@@ -1,4 +1,50 @@
+# 一.基本概念
+
 ![images](https://raw.githubusercontent.com/MrWater233/PictureHost/master/ElasticSearch%E7%A4%BA%E6%84%8F%E5%9B%BE.png)
+
+![](https://raw.githubusercontent.com/MrWater233/PictureHost/master/20200513094757.png)
+
+# 二.Docker环境的搭建
+
+## 1.ElasticSearch
+
+```shell
+docker pull elasticsearch:6.8.1
+docker run -e ES_JAVA_OPTS="-Xms256m -Xmx256m" -d -p 9200:9200 -p 9300:9300 -p 5601:5601 --name elasticsearch elasticsearch:6.8.1
+```
+
+`5601`为kibana的端口
+
+[ElasticSearch容器无法启动问题](https://blog.csdn.net/qq_43268365/article/details/88234308?depth_1-utm_source=distribute.pc_relevant.none-task&utm_source=distribute.pc_relevant.none-task)
+
+访问端口`9200`
+
+## 2.Kibana
+
+```shell
+docker pull kibana:6.8.1
+docker run -it -d -e ELASTICSEARCH_URL=http://127.0.0.1:9200 --name kibana --network=container:elasticsearch kibana:6.8.1
+```
+
+`--network`指定容器共享elasticsearch容器的网络栈 (使用了--network 就不能使用-p 来暴露端口)
+
+访问端口`5601`
+
+# 三.RestAPI的使用
+
+## 索引
+
+1. 查看所有索引：`GET:/_all`
+2. 创建索引：`PUT:/索引名`
+3. 删除索引：`DELETE:/索引名`
+
+## 数据
+
+> 因为ES推荐一个index下只有一个type，所以统一用`_doc`
+
+1. 插入数据：`PUT:/索引名/_doc/id`然后发送一段JSON数据
+2. 根据获取数据：`GET:/索引名/_doc/id`
+3. 搜索数据：`GET:/索引名/_doc/_search?q=first_name:john`
 
 # SpringBoot集成
 
@@ -129,17 +175,6 @@ spring:
 ![images](https://raw.githubusercontent.com/MrWater233/PictureHost/master/20200229213659.png)
 
  具体查看[version](https://docs.spring.io/spring-data/elasticsearch/docs/3.2.0.RC3/reference/html/#preface.versions)
-
-**以6.8.1为例的docker安装：**
-
-```shell
-docker pull elasticsearch:6.8.1
-docker run -e ES_JAVA_OPTS="-Xms256m -Xmx256m" -d -p 9200:9200 -p 9300:9300 --name es 镜像ID
-```
-
-#### 容器无法启动问题
-
-[ElasticSearch容器无法启动问题](https://blog.csdn.net/qq_43268365/article/details/88234308?depth_1-utm_source=distribute.pc_relevant.none-task&utm_source=distribute.pc_relevant.none-task)
 
 ### 配置
 

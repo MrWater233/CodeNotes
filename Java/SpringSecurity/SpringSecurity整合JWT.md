@@ -76,8 +76,6 @@ jwt:
 `com.weixin.room.util.JwtTokenUtil`
 
 ```java
-package com.weixin.room.util;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -215,8 +213,6 @@ public class JwtTokenUtil {
 `com.weixin.room.entity.Base`
 
 ```java
-package com.weixin.room.entity;
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
@@ -265,8 +261,6 @@ public class Base implements Serializable {
 `com.weixin.room.entity.User`
 
 ```java
-package com.weixin.room.entity;
-
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -308,8 +302,6 @@ public class User extends Base{
 `com.weixin.room.config.WebSecurityConfig`
 
 ```java
-package com.weixin.room.config;
-
 import com.weixin.room.component.RestAuthenticationEntryPoint;
 import com.weixin.room.component.RestfulAccessDeniedHandler;
 import com.weixin.room.dto.AuthUserDetails;
@@ -451,8 +443,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 `com.weixin.room.component.RestfulAccessDeniedHandler`
 
 ```java
-package com.weixin.room.component;
-
 import cn.hutool.json.JSONUtil;
 import com.weixin.room.enums.ResponseEnum;
 import com.weixin.room.util.ResultUtil;
@@ -488,8 +478,6 @@ public class RestfulAccessDeniedHandler implements AccessDeniedHandler {
 `com.weixin.room.component.RestAuthenticationEntryPoint`
 
 ```java
-package com.weixin.room.component;
-
 import cn.hutool.json.JSONUtil;
 import com.weixin.room.enums.ResponseEnum;
 import com.weixin.room.util.ResultUtil;
@@ -525,8 +513,6 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 `com.weixin.room.filter.JwtAuthenticationTokenFilter`
 
 ```java
-package com.weixin.room.filter;
-
 import com.weixin.room.util.JwtTokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -593,8 +579,6 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 `com.weixin.room.dao.UserDao`
 
 ```java
-package com.weixin.room.dao;
-
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.weixin.room.entity.Role;
 import com.weixin.room.entity.User;
@@ -628,8 +612,6 @@ public interface UserDao extends BaseMapper<User> {
 `com.weixin.room.service.UserService`
 
 ```java
-package com.weixin.room.service;
-
 import com.weixin.room.entity.Role;
 import com.weixin.room.entity.User;
 
@@ -675,8 +657,6 @@ public interface UserService {
 `com.weixin.room.service.impl.UserServiceImpl`
 
 ```java
-package com.weixin.room.service.impl;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.weixin.room.dao.UserDao;
@@ -768,9 +748,9 @@ public class UserServiceImpl implements UserService {
 
 # 十.Controller层设计
 
-```java
-package com.weixin.room.controller;
+`com.weixin.room.controller.UserController.java`
 
+```java
 import com.weixin.room.entity.User;
 import com.weixin.room.enums.ResponseEnum;
 import com.weixin.room.service.UserService;
@@ -861,8 +841,6 @@ public class UserController {
 `com.weixin.room.vo.ResultVo`
 
 ```java
-package com.weixin.room.vo;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -902,8 +880,6 @@ public class ResultVo<T> implements Serializable {
 `com.weixin.room.enums.ResponseEnum`
 
 ```java
-package com.weixin.room.enums;
-
 import lombok.Getter;
 
 /**
@@ -950,8 +926,6 @@ public enum ResponseEnum {
 `com.weixin.room.util.ResultUtil`
 
 ```java
-package com.weixin.room.util;
-
 import com.weixin.room.enums.ResponseEnum;
 import com.weixin.room.vo.ResultVo;
 
@@ -998,8 +972,6 @@ public final class ResultUtil {
 `com.weixin.room.exception.GlobalExceptionHandler`
 
 ```java
-package com.weixin.room.exception;
-
 import com.weixin.room.enums.ResponseEnum;
 import com.weixin.room.util.ResultUtil;
 import com.weixin.room.vo.ResultVo;
@@ -1115,8 +1087,6 @@ public class GlobalExceptionHandler {
 # 十三.跨域配置
 
 ```java
-package com.weixin.room.config;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
