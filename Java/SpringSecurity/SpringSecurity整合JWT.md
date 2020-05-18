@@ -57,6 +57,7 @@ spring:
 
 mybatis-plus:
   global-config:
+    FieldStrategy: 2 #NULL和空字符串都不会更新
     db-config:
       id-type: auto
       logic-delete-field: deleted
@@ -360,6 +361,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/**/*.html",
                         "/**/*.css",
                         "/**/*.js",
+                        "/swagger-ui.html/**",
                         "/swagger-resources/**",
                         "/v2/api-docs/**"
                 )
@@ -508,7 +510,67 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 }
 ```
 
-# 七.自定义JWT filter
+# 七.自定义的用户Details
+
+`com.weixin.room.dto.AuthUserDetails`
+
+```java
+@Data
+public class AuthUserDetails implements UserDetails {
+    private static final long serialVersionUID = 7117432422333250549L;
+
+    private User user;
+    private List<Role> roleList;
+
+    public AuthUserDetails(User user, List<Role> roleList) {
+        this.user = user;
+        this.roleList = roleList;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        //返回当前用户的权限
+        return roleList.stream()
+                .filter(permission -> permission.getName() != null)
+                .map(permission -> new SimpleGrantedAuthority(permission.getName()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getPassword() {
+        return user.getPassword();
+    }
+
+    @Override
+    public String getUsername() {
+        return user.getUsername();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        //return user.getStatus().equals(1);
+        return true;
+    }
+}
+
+```
+
+# 八.自定义JWT filter
 
 `com.weixin.room.filter.JwtAuthenticationTokenFilter`
 
@@ -574,7 +636,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
 ```
 
-# 八.Dao层设计
+# 九.Dao层设计
 
 `com.weixin.room.dao.UserDao`
 
@@ -599,7 +661,7 @@ public interface UserDao extends BaseMapper<User> {
      * @return
      */
     @Select("SELECT DISTINCT role.name FROM user " +
-            "JOIN user_role ON user.id = user_role.user_id " +
+            "JOIN user_role ON user.id = user_role.user_id AND user_role.deleted=0 " +
             "JOIN role ON role.id = user_role.role_id "+
             "WHERE user.id=#{id}")
     List<Role> selectPermissions(Long id);
@@ -607,7 +669,7 @@ public interface UserDao extends BaseMapper<User> {
 
 ```
 
-# 九.Service层设计
+# 十.Service层设计
 
 `com.weixin.room.service.UserService`
 
@@ -746,7 +808,7 @@ public class UserServiceImpl implements UserService {
 }
 ```
 
-# 十.Controller层设计
+# 十一.Controller层设计
 
 `com.weixin.room.controller.UserController.java`
 
@@ -836,7 +898,7 @@ public class UserController {
 }
 ```
 
-# 十一.返回类设计
+# 十二.返回类设计
 
 `com.weixin.room.vo.ResultVo`
 
@@ -967,7 +1029,7 @@ public final class ResultUtil {
 }
 ```
 
-# 十二.异常处理
+# 十三.异常处理
 
 `com.weixin.room.exception.GlobalExceptionHandler`
 
@@ -1084,7 +1146,7 @@ public class GlobalExceptionHandler {
 }
 ```
 
-# 十三.跨域配置
+# 十四.跨域配置
 
 ```java
 import org.springframework.context.annotation.Configuration;
@@ -1111,6 +1173,57 @@ public class MvcConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "DELETE", "PUT")
                 .maxAge(3600)
                 .allowedHeaders("*");
+    }
+}
+```
+
+# 十五 .常用工具类
+
+`com.weixin.room.util.AuthUtil`
+
+```java
+import com.weixin.room.dto.AuthUserDetails;
+import com.weixin.room.entity.User;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+
+/**
+ * @author WanJingmiao
+ * @Description
+ * @date 2020/5/16 17:10
+ * @Version
+ */
+@Component
+public class AuthUtil {
+    /**
+     * 判断当前登陆用户是否拥有某项权限
+     *
+     * @param permission
+     * @return
+     */
+    public Boolean hasAuthority(String permission) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        for (GrantedAuthority auth : authentication.getAuthorities()) {
+            if (auth.getAuthority().equals(permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 获取当前登陆用户的全部信息
+     *
+     * @return
+     */
+    public User getUserInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof AuthUserDetails) {
+            return ((AuthUserDetails) authentication.getPrincipal()).getUser();
+        }
+        return null;
     }
 }
 ```
