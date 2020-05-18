@@ -209,7 +209,7 @@ public class JwtTokenUtil {
 }
 ```
 
-# 四.用户实体类
+# 四.实体类
 
 `com.weixin.room.entity.Base`
 
@@ -256,7 +256,6 @@ public class Base implements Serializable {
     @TableLogic
     Integer deleted;
 }
-
 ```
 
 `com.weixin.room.entity.User`
@@ -295,7 +294,38 @@ public class User extends Base{
     @TableField(exist = false)
     List<Role> roles;
 }
+```
 
+`com.weixin.room.entity.Role`
+
+```java
+import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+/**
+ * @author WanJingmiao
+ * @Description
+ * @date 2020/5/8 16:43
+ * @Version
+ */
+@Data
+@TableName("role")
+@Api("角色实体")
+public class Role extends Base{
+    private static final long serialVersionUID = -4154275071792755781L;
+    /**
+     * 名字
+     */
+    @ApiModelProperty(value = "角色名",example = "leader")
+    String name;
+    /**
+     * 描述
+     */
+    @ApiModelProperty(value = "描述",example = "无")
+    String description;
+}
 ```
 
 # 五.SpringSecurity配置类
