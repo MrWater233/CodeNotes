@@ -48,6 +48,7 @@
 
 ```yaml
 spring:
+  # 数据库配置
   datasource:
     username: #数据库用户名
     password: #数据库密码
@@ -55,16 +56,17 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
 
+# MybatisPlus配置
 mybatis-plus:
   global-config:
-    FieldStrategy: 2 #NULL和空字符串都不会更新
+    FieldStrategy: 2 # NULL和空字符串都不会更新
     db-config:
-      id-type: auto
-      logic-delete-field: deleted
+      id-type: auto # 主键自增
+      logic-delete-field: deleted # 逻辑删除字段名
       logic-delete-value: 1 # 逻辑已删除值(默认为 1)
       logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
 
-# 自定义jwt key
+# 自定义jwt key配置
 jwt:
   tokenHeader: Authorization #JWT存储的请求头
   secret: mySecret #JWT加解密使用的密钥
@@ -756,6 +758,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -788,6 +791,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao,User> implements UserSe
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean register(User userParam) {
         User user = new User();
         BeanUtils.copyProperties(userParam, user);
