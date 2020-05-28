@@ -333,13 +333,6 @@ public class Role extends Base{
 `com.weixin.room.config.WebSecurityConfig`
 
 ```java
-import com.weixin.room.component.RestAuthenticationEntryPoint;
-import com.weixin.room.component.RestfulAccessDeniedHandler;
-import com.weixin.room.dto.AuthUserDetails;
-import com.weixin.room.entity.Role;
-import com.weixin.room.entity.User;
-import com.weixin.room.filter.JwtAuthenticationTokenFilter;
-import com.weixin.room.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -476,8 +469,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 ```java
 import cn.hutool.json.JSONUtil;
-import com.weixin.room.enums.ResponseEnum;
-import com.weixin.room.util.ResultUtil;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
@@ -511,8 +502,6 @@ public class RestfulAccessDeniedHandler implements AccessDeniedHandler {
 
 ```java
 import cn.hutool.json.JSONUtil;
-import com.weixin.room.enums.ResponseEnum;
-import com.weixin.room.util.ResultUtil;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -545,6 +534,15 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 `com.weixin.room.dto.AuthUserDetails`
 
 ```java
+import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Data
 public class AuthUserDetails implements UserDetails {
     private static final long serialVersionUID = 7117432422333250549L;
@@ -605,7 +603,6 @@ public class AuthUserDetails implements UserDetails {
 `com.weixin.room.filter.JwtAuthenticationTokenFilter`
 
 ```java
-import com.weixin.room.util.JwtTokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -672,8 +669,6 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
 ```java
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.weixin.room.entity.Role;
-import com.weixin.room.entity.User;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -704,8 +699,7 @@ public interface UserDao extends BaseMapper<User> {
 `com.weixin.room.service.UserService`
 
 ```java
-import com.weixin.room.entity.Role;
-import com.weixin.room.entity.User;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
@@ -715,7 +709,7 @@ import java.util.List;
  * @date 2020/5/8 14:59
  * @Version
  */
-public interface UserService {
+public interface UserService extends IService<User>{
     /**
      * 根据用户名寻找用户
      *
@@ -751,11 +745,6 @@ public interface UserService {
 ```java
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.weixin.room.dao.UserDao;
-import com.weixin.room.entity.Role;
-import com.weixin.room.entity.User;
-import com.weixin.room.service.UserService;
-import com.weixin.room.util.JwtTokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -778,9 +767,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class UserServiceImpl implements UserService {
-    @Autowired
-    UserDao userDao;
+public class UserServiceImpl extends ServiceImpl<UserDao,User> implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -792,12 +779,12 @@ public class UserServiceImpl implements UserService {
     public User getUserByUsername(String username) {
         QueryWrapper<User> wrapper = new QueryWrapper<User>();
         wrapper.eq("username", username);
-        return userDao.selectOne(wrapper);
+        return baseMapper.selectOne(wrapper);
     }
 
     @Override
     public List<Role> getPermissions(Long userId) {
-        return userDao.selectPermissions(userId);
+        return baseMapper.selectPermissions(userId);
     }
 
     @Override
@@ -807,13 +794,13 @@ public class UserServiceImpl implements UserService {
         //判断用户名是否重复
         QueryWrapper<User> wrapper = new QueryWrapper<User>();
         wrapper.eq("username", user.getUsername());
-        if (userDao.selectOne(wrapper) != null) {
+        if (baseMapper.selectOne(wrapper) != null) {
             return false;
         }
         //对密码进行加密
         String encodePassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodePassword);
-        userDao.insert(user);
+        baseMapper.insert(user);
         return true;
     }
 
@@ -843,11 +830,6 @@ public class UserServiceImpl implements UserService {
 `com.weixin.room.controller.UserController.java`
 
 ```java
-import com.weixin.room.entity.User;
-import com.weixin.room.enums.ResponseEnum;
-import com.weixin.room.service.UserService;
-import com.weixin.room.util.ResultUtil;
-import com.weixin.room.vo.ResultVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -1018,9 +1000,6 @@ public enum ResponseEnum {
 `com.weixin.room.util.ResultUtil`
 
 ```java
-import com.weixin.room.enums.ResponseEnum;
-import com.weixin.room.vo.ResultVo;
-
 /**
  * @author WanJingmiao
  * @Description
@@ -1064,9 +1043,6 @@ public final class ResultUtil {
 `com.weixin.room.exception.GlobalExceptionHandler`
 
 ```java
-import com.weixin.room.enums.ResponseEnum;
-import com.weixin.room.util.ResultUtil;
-import com.weixin.room.vo.ResultVo;
 import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.firewall.RequestRejectedException;
@@ -1212,8 +1188,6 @@ public class MvcConfig implements WebMvcConfigurer {
 `com.weixin.room.util.AuthUtil`
 
 ```java
-import com.weixin.room.dto.AuthUserDetails;
-import com.weixin.room.entity.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
