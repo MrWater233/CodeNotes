@@ -2,6 +2,20 @@
 
 > Spring实现web模块，简化web开发
 
+![image-20200625115306417](https://raw.githubusercontent.com/MrWater233/PictureHost/master/image-20200625115306417.png)
+
+SpringMVC将参数封装等行为抽取出来成为**前端控制器**
+
+本质上**前端控制器**就是一个Servlet，他接收所有路径的请求，处理完成后再分发给不同的控制器(POJO)
+
+配置步骤：
+
+1. 导入SpringMVC依赖
+2. 在`web.xml`中配置前端控制器DispatcherServlet（普通Servlet）
+3. 编写Controller
+4. 将Controller通过注解配置到容器中
+5. 配置spring-mvc.xml配置组件扫描（扫描Controller，其他由Spring扫描）
+
 # 二.环境配置
 
 [基础IDEA环境搭建](https://yq.aliyun.com/articles/693866)
@@ -94,8 +108,11 @@ pom依赖：
           xmlns:context="http://www.springframework.org/schema/context"
           xsi:schemaLocation="http://www.springframework.org/schema/beans
            https://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
-       <!--扫描所有组件-->
-       <context:component-scan base-package="com.mvc"></context:component-scan>
+       <!--扫描controller组件-->
+       <context:component-scan base-package="com.mvc.controller"></context:component-scan>
+       
+       <!--配置MVC注解驱动，启用处理器映射器和处理器适配器-->
+       <mvc:annotation-driven/>
    
        <!--配置一个视图解析器，能够帮助我们拼接页面地址，简化Controller配置-->
        <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
@@ -104,6 +121,9 @@ pom依赖：
            <!--后缀-->
            <property name="suffix" value=".jsp"></property>
        </bean>
+       
+       <!--开放静态资源访问权限-->
+       <mvc:default-servlet-handler></mvc:default-servlet-handler>
    </beans>
    ```
 
@@ -284,15 +304,17 @@ pom依赖：
 
 1. 在方法参数传入Map、Model或者ModelMap
 
+   通过`addAttribute()`加入数据
+
    三种类型的关系:最终都是使用BindingAwareModelMap
 
    可以在页面可以在**请求域**中获取
 
-2. 方法返回值定义为ModelAndView类型
+2. 方法返回值定义为ModelAndView类型（可以自己new也可以在方法形参上让SpringMVC传递）
 
    在这个类型中设置转发的视图(构造方法或者`setViewName()`)
 
-   使用addObject方法在ModelAndView中加入k-v
+   使用`addObject()`方法在ModelAndView中加入`k-v`
 
    可以在页面可以在**请求域**中获取
 
@@ -319,7 +341,7 @@ pom依赖：
    作用:
 
    controller先从数据库中取出对象,而不是让SpringMVC去创建对象
-   
+
    再接收前端传入属性去覆盖对象属性,保证了传入数据库对象不会为null
 
 # 七.转发和重定向

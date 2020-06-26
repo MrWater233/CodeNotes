@@ -68,10 +68,10 @@ mybatis-plus:
 
 # 自定义jwt key配置
 jwt:
-  tokenHeader: Authorization #JWT存储的请求头
-  secret: mySecret #JWT加解密使用的密钥
-  expiration: 604800 #JWT的超期限时间(60*60*24)
-  tokenHead: Bearer  #JWT负载中拿到开头
+  requestHeader: Authorization # JWT存储的请求头
+  secret: mySecret # JWT加解密使用的密钥
+  expiration: 604800 # JWT的超期限时间(60*60*24)
+  tokenHeader: Bearer  # JWT负载中拿到开头
 ```
 
 # 三.JWT Token工具类
@@ -633,25 +633,26 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+    @Value("${jwt.requestHeader}")
+    private String requestHeader;
     @Value("${jwt.tokenHeader}")
     private String tokenHeader;
-    @Value("${jwt.tokenHead}")
-    private String tokenHead;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authHeader = request.getHeader(this.tokenHeader);
-        if (null != authHeader && authHeader.startsWith(this.tokenHead)) {
+        String authHeader = request.getHeader(this.requestHeader);
+        if (null != authHeader && authHeader.startsWith(this.tokenHeader)) {
             //解析token
-            String authToken = authHeader.substring(this.tokenHead.length());
+            String authToken = authHeader.substring(this.tokenHeader.length());
+            System.out.println("authToken:" + authToken);
             String username = jwtTokenUtil.getUserNameFromToken(authToken);
             log.info("checking username:{}", username);
             //如果得到用户名并且当前用户未授权
-            if(null!=username&& SecurityContextHolder.getContext().getAuthentication()==null){
+            if (null != username && SecurityContextHolder.getContext().getAuthentication() == null) {
                 //根据用户名从数据库中获取用户信息(userDetailsService，UserDetails都是在config中自定义的)
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-                if(jwtTokenUtil.validateToken(authToken,userDetails)){
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+                if (jwtTokenUtil.validateToken(authToken, userDetails)) {
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     log.info("authenticated user:{}", username);
                     //将认证信息存入上下文中
@@ -659,10 +660,9 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 }
             }
         }
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
 }
-
 ```
 
 # 九.Dao层设计
@@ -854,51 +854,52 @@ import java.util.Map;
 @RequestMapping("/user")
 public class UserController {
     @Autowired
-    UserService userService;
+    private UserService userService;
+    @Value("${jwt.requestHeader}")
+    private String requestHeader;
     @Value("${jwt.tokenHeader}")
     private String tokenHeader;
-    @Value("${jwt.tokenHead}")
-    private String tokenHead;
 
     /**
-     * 测试接口，需要admin权限才能访问
+     * 测试接口，需要登陆才能访问
+     *
      * @return
      */
     @GetMapping("/hello")
-    @PreAuthorize("hasAuthority('admin')")
-    public String test(){
+    public String test() {
         return "hello";
     }
 
     /**
      * 注册接口
-     * @param user
-     * @return
+     *
+     * @param user 用户信息
+     * @return 返回成功或者失败的状态信息
      */
     @PostMapping("/register")
-    public ResultVo register(User user){
+    public ResultVo<Object> register(@RequestBody UserAuthVo user) {
         Boolean isSuccess = userService.register(user);
-        if(isSuccess){
+        if (isSuccess) {
             return ResultUtil.success();
         }
         return ResultUtil.error(ResponseEnum.REGISTER_ERROR);
     }
 
     /**
-     * 登录接口
-     * @param username
-     * @param password
-     * @return
+     * 登陆接口
+     *
+     * @return 返回成功或者失败的状态信息
      */
     @PostMapping("/login")
-    public ResultVo login(String username,String password){
-        String token = userService.login(username,password);
-        if (token==null){
+    public ResultVo<Object> login(@RequestBody UserAuthVo user) {
+        String token = userService.login(user);
+        if (token == null) {
             return ResultUtil.error(ResponseEnum.LOGIN_ERROR);
         }
-        Map<String, String> tokenMap = new HashMap<>();
+        Map<String, String> tokenMap = new HashMap<>(16);
         tokenMap.put("token", token);
-        tokenMap.put("tokenHead", tokenHead);
+        tokenMap.put("tokenHeader", tokenHeader);
+        tokenMap.put("requestHeader", requestHeader);
         return ResultUtil.success(tokenMap);
     }
 
@@ -1010,32 +1011,31 @@ public enum ResponseEnum {
  * @date 2020/5/8 14:59
  * @Version
  */
-public final class ResultUtil {
-
-    public static ResultVo success(Object data) {
-        ResultVo result = new ResultVo();
+public class ResultUtil {
+    public static ResultVo<Object> success(Object data) {
+        ResultVo<Object> result = new ResultVo<>();
         result.setCode(ResponseEnum.SUCCESS.getCode());
         result.setMsg(ResponseEnum.SUCCESS.getMsg());
         result.setData(data);
         return result;
     }
 
-    public static ResultVo success() {
+    public static ResultVo<Object> success() {
         return success(null);
     }
 
-    public static ResultVo error(String code, String msg) {
-        ResultVo result = new ResultVo();
+    public static ResultVo<Object> error(String code, String msg) {
+        ResultVo<Object> result = new ResultVo<>();
         result.setCode(code);
         result.setMsg(msg);
         result.setData(null);
         return result;
     }
 
-    public static ResultVo error(ResponseEnum ResponseEnum) {
-        ResultVo result = new ResultVo();
-        result.setCode(ResponseEnum.getCode());
-        result.setMsg(ResponseEnum.getMsg());
+    public static ResultVo<Object> error(ResponseEnum responseEnum) {
+        ResultVo<Object> result = new ResultVo<>();
+        result.setCode(responseEnum.getCode());
+        result.setMsg(responseEnum.getMsg());
         result.setData(null);
         return result;
     }
@@ -1149,7 +1149,7 @@ public class GlobalExceptionHandler {
      * @return
      */
     @ExceptionHandler(Exception.class)
-    public ResultVo exceptionHander(Exception e) {
+    public ResultVo exceptionHandler(Exception e) {
         e.printStackTrace();
         return ResultUtil.error(ResponseEnum.SERVICE_ERROR);
     }

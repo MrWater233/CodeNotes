@@ -1765,7 +1765,7 @@ public class Logger {
        <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
            <property name="dataSource" ref="dataSource"/>
        </bean>
-       <!--2.配置事务的通知，此时需要导入事务的约束，tx和aop的都需要-->
+       <!--2.配置事务的通知（进行事务增强），此时需要导入事务的约束，tx和aop的都需要-->
        <tx:advice id="txAdvice" transaction-manager="transactionManager">
            <!--配置事务的属性-->
            <tx:attributes>
@@ -1773,7 +1773,7 @@ public class Logger {
                <tx:method name="find*" propagation="SUPPORTS" read-only="true"/>
            </tx:attributes>
        </tx:advice>
-       <!--3.配置AOP-->
+       <!--3.事务的AOP织入-->
        <aop:config>
            <!--配置切入点表达式-->
            <aop:pointcut id="pt1" expression="execution(* com.spring.service.impl.*.*(..))"/>
@@ -2016,5 +2016,63 @@ public class Logger {
   jdbc.password=123456
   ```
 
-  
 
+# 五.集成web环境
+
+1. 导入spring-web坐标
+
+   ```xml
+   <dependency>
+       <groupId>org.springframework</groupId>
+       <artifactId>spring-web</artifactId>
+       <version>5.0.5.RELEASE</version>
+   </dependency>
+   ```
+
+2. Spring配置文件
+
+   `classpath:applicationContext.xml`
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           https://www.springframework.org/schema/context/spring-context.xsd">
+       <!-组件扫描，排除Controller-->
+       <context:component-scan base-package="com.spring.jdbc">
+       	<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"></context:exclude-filter>
+       </context:component-scan>
+   </beans>
+   ```
+
+3. 配置`ContextLoaderListener`监听器
+
+   `web.xml`
+
+   ```xml
+   <!--全局参数，指定Spring配置文件的位置-->
+   <context-param>
+       <param-name>contextConfigLocation</param-name>
+       <param-value>classpath:applicationContext.xml</param-value>
+   </context-param>
+   <!--Spring的监听器-->
+   <listener>
+   	<listener-class>
+          org.springframework.web.context.ContextLoaderListener
+      </listener-class>
+    </listener>
+   ```
+
+4. 获取上下文对象，并用来获取bean
+
+   ```java
+   ApplicationContext applicationContext =    
+       WebApplicationContextUtils.getWebApplicationContext(servletContext);
+   Object obj = applicationContext.getBean("id");
+   ```
+
+   
