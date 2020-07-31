@@ -548,7 +548,6 @@ new Vue({
     Vue.component("my-cpn", cpnC);
     new Vue({
       el: "#app"
-
     })
   </script>
 </body>
