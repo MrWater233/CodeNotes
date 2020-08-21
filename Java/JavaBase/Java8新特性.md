@@ -94,10 +94,10 @@ public void test3(){
 ## 四大核心函数式接口
 
 ```java
-consumer<T>//消费型接口
+Consumer<T>//消费型接口
     void accept(T t);
 
-Suppiler<T>//供给型接口
+Supplier<T>//供给型接口
     T get();
 
 Function<T,R>//函数型接口
