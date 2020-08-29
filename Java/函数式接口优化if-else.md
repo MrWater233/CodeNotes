@@ -2,7 +2,9 @@
 >
 > 但是策略模式会导致策略实现类较多，不能从宏观的角度去了解各个逻辑
 >
-> 因此可以使用map+函数式接口+lambda表达式的方式去优化
+> 因此可以使用`map+函数式接口+lambda表达式`的方式去优化
+
+# 基本写法
 
 ```java
 @Service
@@ -36,7 +38,7 @@ public class RoomServiceImpl implements RoomService {
 
 将逻辑都保存进一个map ，通过不同的key去获取
 
-
+# 逻辑代码分离写法
 
 当各个**策略的逻辑**过多时也可以将逻辑提取出一个公共`service`
 
@@ -92,6 +94,5 @@ public class RoomServiceImpl implements RoomService {
         return result.get();
     }
 }
-
 ```
 
