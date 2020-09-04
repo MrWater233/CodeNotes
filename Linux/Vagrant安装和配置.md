@@ -40,7 +40,11 @@
    exit;
    ```
 
-6. 可以在`VirtualBox`中关闭虚拟机
+6. 可以在`VirtualBox`中关闭虚拟机，也可以使用命令关闭
+
+   ```shell
+   vagrant halt
+   ```
 
 7. 下次想要启动虚拟机可以在`VirtualBox`中启动
 
