@@ -695,6 +695,8 @@ public class UserService {
 - 属性：
 
   - value：指定其他配置类的字节码
+  
+- 注意：该注解注入容器的Bean的id为该类的全类名，如`com.test.Test1`
 
 #### 使用
 

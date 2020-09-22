@@ -17,7 +17,7 @@
 
 ## 1.2 接口
 
-![](https://raw.githubusercontent.com/MrWater233/PictureHost/master/20200908120813.png)
+![](https://raw.githubusercontent.com/MrWater233/PictureHost/master/20200917091507.png)
 
 - 接口图由三部分组成
   1. 接口名，必须用斜体表示，而且顶端需要用`<<interface>>`修饰
@@ -26,7 +26,9 @@
 
 ## 1.3 注释
 
-![](https://raw.githubusercontent.com/MrWater233/PictureHost/master/20200908121646.jpg)
+> 注释表示对类图的附加说明
+
+![](https://raw.githubusercontent.com/MrWater233/PictureHost/master/20200917091747.png)
 
 用一个右上角带卷角的长方形表示注释，并用虚线与实体类连接
 

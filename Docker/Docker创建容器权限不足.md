@@ -18,13 +18,13 @@
 2. 创建容器时给容器增加权限
 
    ```shell
-    –privileged=true
+    --privileged=true
    ```
 
    如
 
    ```shell
-   docker run -p 3306:3306 –privileged=true --name mysql \
+   docker run -p 3306:3306 --privileged=true --name mysql \
    -v /mydata/mysql/log:/var/log/mysql \
    -v /mydata/mysql/data:/var/lib/mysql \
    -v /mydata/mysql/conf:/etc/mysql \
