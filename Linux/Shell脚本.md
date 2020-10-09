@@ -508,3 +508,143 @@ fi
 Shell没有多行注释，只能一行一行注释
 
 但是也可以将代码定义为函数，在需要的地方调用，不调用就等于注释起来了
+
+# 八.字符串
+
+## 8.1 使用变量
+
+```shell
+str="abcd"
+
+echo "${str}" "$str"
+```
+
+## 8.2 获取字符串长度
+
+```shell
+str="abcd"
+echo "${#str}" #输出4
+```
+
+## 8.3 提取子字符串
+
+```shell
+str="abcdefg"
+echo "${str:1:2}" #输出bc
+```
+
+# 九.数组
+
+## 9.1 定义数组
+
+```shell
+# 方法1
+array=(value0 value1 value2...)
+
+# 方法2
+# 可以不使用连续的下标并且下标范围无限制
+array[0]=value0
+array[1]=value1
+array[2]=value2
+```
+
+## 9.2 读取数组
+
+格式：
+
+```shell
+${array[index]}
+```
+
+获取数组中所有元素：
+
+```shell
+# 使用@或者*都可以获取数组中所有元素
+${array[*]}
+${array[@]}
+```
+
+## 9.3 获取数组长度
+
+```shell
+# 获取数组总长度
+length=${#array[@]}
+# 或
+length=${#array[*]}
+
+# 获取某个元素的长度
+length=${#array[index]}
+
+# 获取最短元素的长度
+length=${#array[n]}
+```
+
+# 十.echo命令
+
+> echo是Shell的一个内部指令，用于在屏幕上打印出指定的字符串
+>
+> echo输出内容**双引号可有可无**，**单引号主要用来原样输出**
+
+## 10.1 结果输出重定向
+
+```shell
+# 输出重定向到其他文件
+echo "hello world" > myfile
+```
+
+## 10.2 显示转义字符
+
+```shell
+echo "\"It is a test\""
+```
+
+双引号可以省略
+
+## 10.3 显示变量
+
+```shell
+name="OK"
+echo "$name It is a test"
+```
+
+结果：
+
+```shell
+OK It is a test
+```
+
+双引号可以省略
+
+
+
+如果变量和其他字符相连，需要加上`{}`
+
+```shell
+mouth=8
+echo "${mouth}-1-2009"
+```
+
+结果：
+
+```shell
+8-1-2009
+```
+
+## 10.4 原样输出
+
+使用单引号进行原样的输出
+
+```shell
+echo '$name\"'
+```
+
+## 10.5 输出命令结果
+
+```shell
+echo `date`
+```
+
+输出当前日期
+
+# 十一.printf命令
+

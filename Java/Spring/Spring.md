@@ -1257,6 +1257,7 @@ public class test {}
 2. 后置通知：`<aop:after-returning>`
 3. 异常通知：`<aop:after-throwing>`
 4. 最终通知：`<aop:after>`
+5. 环绕通知：`<aop:around>`
 
 #### 通用化切入点表达式
 

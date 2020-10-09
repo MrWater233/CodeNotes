@@ -6,7 +6,11 @@
 
    可以使用`vagrant`命令检测是否安装成功
 
-3. [下载并安装Vagrant box镜像](https://c4ys.com/archives/1230)
+3. 进入`VirtualBox`修改虚拟机默认安装目录
+
+   ![](https://raw.githubusercontent.com/MrWater233/PictureHost/master/20200923155449.png)
+
+4. [下载并安装Vagrant box镜像](https://c4ys.com/archives/1230)
 
    1. 下载镜像
 
@@ -28,25 +32,25 @@
       vagrant up
       ```
 
-4. 连接进入虚拟机
+5. 连接进入虚拟机
 
    ```shell
    vagrant ssh
    ```
 
-5. 退出虚拟机
+6. 退出虚拟机
 
    ```shell
    exit;
    ```
 
-6. 可以在`VirtualBox`中关闭虚拟机，也可以使用命令关闭
+7. 可以在`VirtualBox`中关闭虚拟机，也可以使用命令关闭
 
    ```shell
    vagrant halt
    ```
 
-7. 下次想要启动虚拟机可以在`VirtualBox`中启动
+8. 下次想要启动虚拟机可以在`VirtualBox`中启动
 
    也可以在创建`Vagrant box`的路径下输入以下命令
 
