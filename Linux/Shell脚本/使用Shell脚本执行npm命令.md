@@ -1,4 +1,4 @@
-1. 配置Node环境变量（修改`/etc/profile`文件）
+1. [配置Node环境变量](https://github.com/MrWater233/CodeNotes/blob/master/FrontEnd/Node/Linux%E6%90%AD%E5%BB%BAnode%E7%8E%AF%E5%A2%83.md)
 
 2. 假设npm项目在`/root/script`中
 
