@@ -23,7 +23,7 @@
    ln -s /usr/local/nodejs/bin/npm /usr/local/bin
    ```
 
-5. 配置环境变量
+5. 配置环境变量（Shell脚本执行命令时使用）
 
    1. 修改`/etc/profile`文件
 
