@@ -23,7 +23,24 @@
    ln -s /usr/local/nodejs/bin/npm /usr/local/bin
    ```
 
-5. 查看是否安装成功
+5. 配置环境变量
+
+   1. 修改`/etc/profile`文件
+
+   2. 在末尾添加
+
+      ```shell
+      export NODE_HOME=/usr/local/nodejs  //Node所在路径
+      export PATH=$NODE_HOME/bin:$PATH
+      ```
+
+   3. 更新环境变量
+
+      ```shell
+      source /etc/profile
+      ```
+
+6. 查看是否安装成功
 
    ```shell
    node -v

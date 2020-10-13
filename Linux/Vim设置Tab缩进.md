@@ -1,7 +1,7 @@
 1. 创建`.vimrc`配置文件
 
    ```shell
-   $ vim ~/.vimrc
+   vim ~/.vimrc
    ```
 
 2. 修改配置文件
