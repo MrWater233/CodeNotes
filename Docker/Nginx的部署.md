@@ -156,7 +156,29 @@ vim /home/docker/nginx/config/conf.d/default.conf
       ```
       
       ```shell
-      # 配置443端口的https
+      # 配置gogs（--link了gogs）的https访问
+      server {
+          listen    443 ssl;
+          server_name  git.mrwater.top;             #域名
+       
+          # 增加ssl
+          #ssl on;        #如果强制HTTPs访问，这行要打开
+          ssl_certificate /ssl/mrwater.top_chain.crt;
+          ssl_certificate_key /ssl/mrwater.top_key.key;
+          ssl_session_timeout 5m;
+          ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+          ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;
+          ssl_prefer_server_ciphers on;
+       
+          # 将请求转发到gogos容器的端口上
+          location / {
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header Host $http_host;
+              proxy_pass http://gogs:3000;
+          }
+      }
+      
+      # 配置443端口https，拦截所有子域名的访问，默认都访问上面编写的HTML
       server {
           #listen    80;       #侦听80端口，如果强制所有的访问都必须是HTTPs的，这行需要注销掉
           listen    443 ssl;
@@ -169,7 +191,7 @@ vim /home/docker/nginx/config/conf.d/default.conf
           ssl_session_timeout 5m;
           ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
           ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;
-          ssl_prefer_server_ciphers on;
+    ssl_prefer_server_ciphers on;
        
           # 定义首页索引目录和名称
           location / {
@@ -184,14 +206,14 @@ vim /home/docker/nginx/config/conf.d/default.conf
           }
       }
       
-      # 配置http跳转到https
+      # 配置80端口跳转到https
       server {
           listen 80;
-          # 这里可以不具体指定
-          server_name  _;
+          # 这里可以不详细指定
+          server_name  *.mrwater.top;
           # 重写地址
-          rewrite ^(.*)$ https://$host$1 permanent; 
-}
+          rewrite ^(.*)$ https://$host$1 permanent;
+      }
       ```
       
       

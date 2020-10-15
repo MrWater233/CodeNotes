@@ -7,16 +7,16 @@
 2. 创建配置文件
 
    ```shell
-   mkdir -p /mydata/redis/conf
-   touch /mydata/redis/conf/redis.conf
+   mkdir -p /home/docker/redis/conf
+   touch /home/docker/redis/conf/redis.conf
    ```
 
 3. 创建并运行容器
 
    ```shell
    docker run -p 6379:6379 --name redis \
-   -v /mydata/redis/data:/data \
-   -v /mydata/redis/conf/redis.conf:/etc/redis/redis.conf \
+   -v /home/docker/redis/data:/data \
+   -v /home/docker/redis/conf/redis.conf:/etc/redis/redis.conf \
    -d redis redis-server /etc/redis/redis.conf \
    --requirepass "123456"
    ```
@@ -30,7 +30,7 @@
 4. 开启aof持久化
 
    ```shell
-   vi /mydata/redis/conf/redis.conf
+   vi /home/docker/redis/conf/redis.conf
    ```
 
    添加以下内容
