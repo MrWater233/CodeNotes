@@ -9,7 +9,7 @@
 3. 建立软连接
 
    ```shell
-   ln -s /usr/local/nodejs/bin/nrm /usr/local/bin/nrm
+   ln -s /usr/local/nodejs/bin/nrm/usr/local/bin/nrm
    ```
 
 4. 查看镜像列表
