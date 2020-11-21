@@ -33,7 +33,7 @@ open ./solarized/osx-terminal.app-colors-solarized
 
 设置并使用Solarized Dark ansi主题，设置字体为`Meslo LG S Regular for Powerline`
 
-# 三.安装主题
+# 四.安装主题
 
 ```shell
 vim ./zshrc
@@ -47,7 +47,7 @@ ZSH_THEME="agnoster"
 
 ![](https://raw.githubusercontent.com/MrWater233/PictureHost/master/20201121120459.png)
 
-# 四.安装命令高亮插件
+# 五.安装命令高亮插件
 
 ```shell
 cd ~/.oh-my-zsh/custom/plugins/
@@ -59,3 +59,8 @@ vi ~/.zshrc
 
 ![](https://raw.githubusercontent.com/MrWater233/PictureHost/master/20201121120600.png)
 
+# 六.参考
+
+- https://www.cnblogs.com/wudi520/articles/11222445.html
+- https://www.cnblogs.com/toulanboy/p/9609365.html
+- https://www.vpsee.com/2013/09/use-the-solarized-color-theme-on-mac-os-x-terminal/
