@@ -1,6 +1,6 @@
 1. vscode安装插件`Remote Development`
 
-2. 进入vagrant文件夹输入`vagrant ssh-config`，得到ssh连接的参数
+2. 进入vagrant虚拟机安装目录输入`vagrant ssh-config`命令，得到ssh连接的参数
 
    ![image-20201123230305996](https://raw.githubusercontent.com/MrWater233/PictureHost/master/20201123230306.png)
 
