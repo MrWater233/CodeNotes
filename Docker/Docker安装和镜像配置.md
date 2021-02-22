@@ -6,12 +6,28 @@
    sudo systemctl enable docker
    ```
 
-3. 配置阿里云镜像加速
+3. 配置镜像加速
 
-   1. 进入阿里云控制台，找到`容器镜像服务`
+   - 配置阿里云镜像加速
 
-      ![](https://raw.githubusercontent.com/MrWater233/PictureHost/master/20200408221421.png)
+     1. 进入阿里云控制台，找到`容器镜像服务`
 
-   2. 镜像中心->镜像加速器
+        ![](https://raw.githubusercontent.com/MrWater233/PictureHost/master/20200408221421.png)
 
-   3. 找到Centos并执行相关命令
+     2. 镜像中心->镜像加速器
+     3. 找到Centos并执行相关命令
+
+   - 配置docker中国官方镜像加速
+
+     编辑`/etc/docker/daemon.json`，修改为
+
+     ```json
+     {
+         "registry-mirrors":[
+             "https://registry.docker-cn.com"
+         ]
+     }
+     ```
+
+     
+
