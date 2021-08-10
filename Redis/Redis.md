@@ -146,7 +146,7 @@
 
 ## 5.有序集合（Zset：sorted set）
 
-> 每一个元素都关联一个double类型分数，按照分数从小到大排序。Zset元素唯一但是分数可以重复
+> 每一个元素都关联一个double类型分数，按照分数从小到大排序。Zset值唯一但是分数可以重复，如果值相同那么会进行覆盖。
 
 1. `zadd key score1 value1 score2 value2...`：增加一个zset
 
@@ -186,7 +186,7 @@
     port 6379
 4. 绑定的主机地址
     bind 127.0.0.1
-5.当 客户端闲置多长时间后关闭连接，如果指定为0，表示关闭该功能
+    5.当 客户端闲置多长时间后关闭连接，如果指定为0，表示关闭该功能
     timeout 300
 6. 指定日志记录级别，Redis总共支持四个级别：debug、verbose、notice、warning，默认为verbose
     loglevel verbose
