@@ -93,7 +93,7 @@
 
 - `acme.sh --list`：列出证书
 
-- `acme.sh remove xxx`：删除证书
+- `acme.sh remove xxx`：删除证书（`xxx`为`list`中的`Main_Domain`）
 
 - 更新`acme.sh`
 
