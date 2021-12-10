@@ -75,7 +75,7 @@ def show_post(post_id):
 | float | 同 int ，但是接受浮点数    |
 | path  | 和默认的相似，但也接受斜线 |
 
-### 1.3.2 url_for()
+### 1.3.2 构建URL
 
 > `url_for()`能够根据视图函数名指定url，只要视图函数不变，url随便变都不会影响
 
@@ -281,5 +281,68 @@ app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 app.logger.debug('A value for debugging')
 app.logger.warning('A warning occurred (%d apples)', 42)
 app.logger.error('An error occurred')
+```
+
+# 蓝图
+
+## 创建一个蓝图
+
+```python
+from flask import Blueprint
+
+admin_bp = Blueprint('admin', __name__)
+
+@admin_bp.route('/')
+def index(name):
+    return '<h1>Hello, this is admin blueprint</h1>'
+```
+
+通过上述代码创建了蓝图对象`admin_bp`，他的使用与Flask的app对象类似。他有自己的路由`admin_bp.route()`
+
+初始化Blueprint对象的第一个参数`admin`指定了蓝图的名称，第二个指定了蓝图所在的模块名
+
+接下去在应用中通过`app.register_blueprint()`注册该蓝图
+
+```python
+from flask import Flask
+from admin.admin_module import admin_bp
+
+app = Flask(__name__)
+app.register_blueprint(admin_bp, url_prefix='/admin')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', debug=True)
+```
+
+`app.register_blueprint()`的`url_prefix`指定了蓝图的URL前缀。现在访问`http://localhost:5000/admin/`就可以加载蓝图的index视图了
+
+也可以在创建蓝图对象的时候就制定URL前缀
+
+```python
+admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+```
+
+这样注册时候就不需要指定了
+
+```python
+app.register_blueprint(admin_bp)
+```
+
+## 构建URL
+
+在使用`url_for()`方法的时候第一个参数如果是蓝图对象，那么需要这么做
+
+```python
+from flask import url_for
+
+url_for('admin.index') # return /admin/
+url_for('admin.static', filename='style.css') # return /admin/static/style.css
+```
+
+这样才能获取`admin`蓝图下的师徒或者资源的URL地址。如果`url_for()`函数的调用就在本蓝图下，那么蓝图名就可以省略，但是必须留下`.`表示当前蓝图
+
+```python
+url_for('.index')
+url_for('.static', filename='style.css')
 ```
 
