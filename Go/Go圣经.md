@@ -791,3 +791,249 @@ fmt.Println(a, b, c, d) // "1 1 2 2"
 # 四.函数
 
 ## 4.1 函数声明
+
+函数声明包括函数名、形式参数、返回值列表（可省略）以及函数体
+
+```go
+func name(parameter-list) (result-list) {
+    body
+}
+```
+
+有时候可能遇到没有函数体的函数声明，说明该函数不是以Go实现的
+
+```go
+package math
+
+func Sin(x float64) float //implemented in assembly language
+```
+
+## 4.2 递归
+
+# 七.并发
+
+## 7.1 Goroutines
+
+> Go语言中，每一个并发执行的单元叫做一个`goroutine`。
+>
+> 当一个程序启动时，主函数即在一个单独的`goroutine`中运行，我们叫它`main goroutine`
+>
+> 当我们主函数结束时，所有的goroutine都会被打断
+
+- 创建goroutine
+
+  我们可以使用`go`语句来创建goroutine
+
+## 7.2 Channels
+
+> channels是goroutine之间的通信机制。它可以让一个goroutine通过它给另一个goroutine发送值信息。一个可以发送int类型的channel一般写为`chan int`
+>
+> 默认情况下，channel发送和接收操作在另一端准备好之前都会阻塞。这使得goroutine可以在没有显式的锁或竞态变量的情况下进行同步。
+
+- 创建channel
+
+  第二个参数对应channel的容量，如果大于0那么该channel就是带缓冲的channel
+
+  仅当channel的缓冲区填满后，向其发送数据时才会阻塞。当缓冲区为空时，接受方会阻塞
+
+  ```go
+  ch = make(chan int)    // 无缓冲channel
+  ch = make(chan int, 0) // 无缓冲channel
+  ch = make(chan int, 3) // 容量为3的有缓冲channel
+  ```
+
+- 操作
+
+  - 发送
+
+    ```go
+    ch <- x
+    ```
+
+  - 接收
+
+    - ```go
+      x = <-ch // <-ch这样不指定接收对象也合法
+      ```
+
+    - ```go
+      for i := range
+      ```
+
+      循环会不断从channel接收值，直到它被关闭。
+
+  - 关闭
+
+    发送者可以通过`close()`关闭一个channel表示没有需要发送的值了
+
+    ```go
+    close(ch)
+    ```
+
+    - 对一个关闭的channel执行发送操作会导致panic异常
+
+    - 对一个关闭的channel执行接收操作依然可以接收之前已经成功发送的数据，如果channel中已经没有数据将会产生一个零值数据
+
+    
+
+    接收者可以通过`<-`第二个返回值来测试信道是否被关闭：若没有值可以接受且channle已经关闭，那么会返回`false`
+
+    ```go
+    v, ok := <-ch
+    ```
+
+    **注意：和文件不同，通常channel不需要关闭，只有在必须告诉接收者不再有需要发送的值时才有必要关闭，例如终止一个 `range` 循环。**
+
+## 7.3 select
+
+> 类似用于通信的`switch`语句。
+>
+> 每个`case`必须是一个通信操作，要么是发送要么是接收。
+
+特性：
+
+- 每个`case`都必须是一个通信
+
+- 所有`channel`表达式都会被求值
+
+- 所有被发送的表达式都会被求值
+
+- 如果任意某个通信可以进行，它就执行，其他被忽略。
+
+- 如果有多个`case`都可以运行，`Select`会随机公平地选出一个执行。其他不会执行。
+
+  否则：
+
+  1. 如果有`default`子句，则执行该语句。
+  2. 如果没有`default`子句，`select`将阻塞，直到某个通信可以运行；Go不会重新对 `channel`或值进行求值。
+
+例子：
+
+```go
+package main
+
+import "fmt"
+
+func fibonacci(c, quit chan int) {
+	x, y := 0, 1
+	for {
+		select {
+		case c <- x:
+			x, y = y, x+y
+		case <-quit:
+			fmt.Println("quit")
+			return
+		}
+	}
+}
+
+func main() {
+	c := make(chan int)
+	quit := make(chan int)
+	go func() {
+		for i := 0; i < 10; i++ {
+			fmt.Println(<-c)
+		}
+		quit <- 0
+	}()
+	fibonacci(c, quit)
+}
+```
+
+结果：
+
+```shell
+0
+1
+1
+2
+3
+5
+8
+13
+21
+34
+quit
+```
+
+## 7.4 sync.Mutex
+
+> 通过`sunc.Mutex`互斥锁来避免协程之间的访问冲突
+
+互斥锁有两个方法`Lock`和`Unlock`
+
+我们可以通过在代码前调用 `Lock` 方法，在代码后调用 `Unlock` 方法来保证一段代码的互斥执行。也可以用 `defer` 语句来保证互斥锁一定会被解锁。
+
+例子：
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+// SafeCounter 的并发使用是安全的。
+type SafeCounter struct {
+	v   map[string]int
+	mux sync.Mutex
+}
+
+// Inc 增加给定 key 的计数器的值。
+func (c *SafeCounter) Inc(key string) {
+	c.mux.Lock()
+	// Lock 之后同一时刻只有一个 goroutine 能访问 c.v
+	c.v[key]++
+	c.mux.Unlock()
+}
+
+// Value 返回给定 key 的计数器的当前值。
+func (c *SafeCounter) Value(key string) int {
+	c.mux.Lock()
+	// Lock 之后同一时刻只有一个 goroutine 能访问 c.v
+	defer c.mux.Unlock()
+	return c.v[key]
+}
+
+func main() {
+	c := SafeCounter{v: make(map[string]int)}
+	for i := 0; i < 1000; i++ {
+		go c.Inc("somekey")
+	}
+
+	time.Sleep(time.Second)
+	fmt.Println(c.Value("somekey"))
+}
+```
+
+结果：
+
+```go
+1000
+```
+
+## 7.5 sync.WaitGroup
+
+> 主线程为了等待goroutine都运行完成，不得不在程序末尾使用`time.Sleep`来休眠一段时间，等待其他协程执行完成，但是我们不能正确估计代码到底需要运行多久
+>
+> 对于这种情况，go语言中有一个其他的工具`sync.WaitGroup` 能更加方便的帮助我们达到这个目的
+
+`WaitGroup` 对象内部有一个计数器，最初从0开始，它有三个方法：`Add(), Done(), Wait()` 用来控制计数器的数量。`Add(n)` 把计数器设置为`n` ，`Done()` 每次把计数器`-1` ，`wait()` 会阻塞代码的运行，直到计数器地值减为0。
+
+```go
+func main() {
+    wg := sync.WaitGroup{}
+    wg.Add(100)
+    for i := 0; i < 100; i++ {
+        go func(i int) {
+            fmt.Println(i)
+            wg.Done()
+        }(i)
+    }
+    wg.Wait()
+}
+```
+
+这里首先把`wg` 计数设置为100， 每个for循环运行完毕都把计数器减一，主函数中使用`Wait()` 一直阻塞，直到wg为零——也就是所有的100个for循环都运行完毕。
